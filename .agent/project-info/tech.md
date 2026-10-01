@@ -5,7 +5,6 @@
 - Language: Rust (brief §2).
 - Target platform: Windows (brief §2).
 - UI: terminal/console only — no graphical window, no external game engine, no sprites/graphical assets; ASCII/Unicode characters represent game elements (brief §2).
-- Status marker: the stack is defined, but the project build does not exist yet (no `Cargo.toml`).
 
 ---
 
@@ -28,7 +27,6 @@
 
 ## Technical Constraints
 
-- The Docker image must contain everything needed to compile for the Windows target (brief §3).
 - Fixed game speed 120 ms per movement; no acceleration required (brief §7).
 - No restart system, no persistence, no configuration files (brief §12, §16).
 - Terminal-only rendering budget: keep the implementation in `main.rs` unless growth justifies modules (brief §17).

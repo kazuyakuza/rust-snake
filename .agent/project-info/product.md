@@ -36,27 +36,12 @@ Simple Rust → Understandable code → Successful Windows build → Working Sna
 
 ## Non-Goals
 
-The initial version should not include:
+Not in scope for the initial version — authoritative list: `brief.md` §16 (19 items, grouped by category below, nothing dropped):
 
-- A graphical UI
-- A game engine
-- Sprites
-- Textures
-- Sound
-- Music
-- Multiplayer
-- Networking
-- Save games
-- High-score persistence
-- Multiple levels
-- Increasing difficulty
-- Power-ups
-- Menus
-- Pause functionality
-- Settings
-- Configuration files
-- Animations beyond normal terminal rendering
-- Windows-specific GUI APIs
+- **Graphics & media**: graphical UI, game engine, sprites, textures, sound, music, animations beyond normal terminal rendering, Windows-specific GUI APIs.
+- **Multiplayer & persistence**: multiplayer, networking, save games, high-score persistence.
+- **Game depth**: multiple levels, increasing difficulty, power-ups.
+- **UX surface**: menus, pause functionality, settings, configuration files.
 
 These may be considered in future experiments, but they are outside the initial scope.
 
@@ -64,22 +49,10 @@ These may be considered in future experiments, but they are outside the initial 
 
 ## Success Criteria
 
-`brief.md` §18 "Definition of Done" is the authoritative checklist. Summary of its 17 points:
+`brief.md` §18 "Definition of Done" is the authoritative checklist (17 items, grouped below, nothing dropped):
 
-1. The project builds successfully using Docker.
-2. Docker produces a Windows `.exe`.
-3. The `.exe` runs directly on Windows.
-4. The game starts with a `Press any key to start` screen.
-5. The Snake starts with exactly 3 blocks.
-6. The Snake moves continuously.
-7. Arrow keys control the direction.
-8. The Snake cannot immediately reverse direction.
-9. A food item appears at a valid random position.
-10. Eating food increases the score by 1.
-11. Eating food increases the Snake length by 1.
-12. The food respawns after being eaten.
-13. Hitting the board boundary causes Game Over.
-14. Hitting the Snake's own body causes Game Over.
-15. The score is displayed during gameplay.
-16. Game Over displays the final score.
-17. A key press exits the application after Game Over.
+- **Build chain** (items 1–3): the project builds successfully using Docker; Docker produces a Windows `.exe`; the `.exe` runs directly on Windows.
+- **Start & initial state** (items 4–6): `Press any key to start` screen; the snake starts with exactly 3 blocks; the snake moves continuously.
+- **Controls** (items 7–8): arrow keys control the direction; the snake cannot immediately reverse direction.
+- **Food & score** (items 9–12, 15): food appears at a valid random position; eating food increases score by 1 and length by 1; the food respawns; the score is displayed during gameplay.
+- **Game over** (items 13–14, 16–17): hitting the boundary and hitting the snake's own body each cause Game Over; Game Over displays the final score; a key press exits the application.

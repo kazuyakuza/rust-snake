@@ -5,7 +5,6 @@
 ## System Architecture
 
 - Single terminal application; the game state is a logical grid, not pixels (brief §5).
-- Current status: planned / not yet implemented — the planned files `Cargo.toml`, `Dockerfile`, `compose.yaml`, and `src/main.rs` do not exist yet.
 
 ---
 
@@ -64,7 +63,7 @@ Suggested model — exact structure left to the implementation (brief §14):
 
 - Board: logical grid, initial `WIDTH = 40`, `HEIGHT = 25` cells; visible boundaries; no screen wrap (brief §5, §8).
 - Cell states: empty, snake head, snake body, food; exact terminal characters decided during implementation (brief §5, §13).
-- Snake starts with 1 head + 2 body segments = 3 blocks; initial direction `RIGHT`; food spawns at a random valid non-overlapping position (brief §4, §13).
+- Snake starts with 1 head + 2 body segments = 3 blocks; initial direction `RIGHT` (brief §4, §13).
 - Controls: arrow keys only; movement is continuous; immediate reversal (e.g. `RIGHT` → `LEFT` in one move) must be rejected (brief §6).
 
 ---
@@ -88,7 +87,7 @@ Suggested model — exact structure left to the implementation (brief §14):
 ## Design Patterns / Constraints
 
 - Keep-it-simple principle (brief §19): simple Rust → understandable code → successful Windows build → working game.
-- No menus/pause/settings/config files — see `product.md` Non-Goals.
+- No menus/pause/settings/config files — see `brief.md` §16 Non-Goals.
 
 ---
 
