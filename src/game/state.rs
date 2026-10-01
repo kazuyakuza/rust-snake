@@ -8,22 +8,14 @@
 use crate::game::direction::Direction;
 use crate::game::food::Food;
 use crate::game::position::Position;
+use crate::game::setup::GameStateSetup;
 use crate::game::snake::Snake;
 
 pub const WIDTH: i32 = 40;
 pub const HEIGHT: i32 = 25;
 
 const INITIAL_SCORE: i32 = 0;
-const MIN_AVAILABLE_COORDINATE: i32 = 0;
-
-// Head-to-tail start: `HEAD` leads and moves `Right`, `BODY_AHEAD` sits adjacent
-// to it, and `BODY_BEHIND` is the tail tip. The initial food shares row 12 but
-// stays clear of every snake cell and inside the playable area.
-const INITIAL_SNAKE_HEAD: Position = Position { x: 10, y: 12 };
-const INITIAL_SNAKE_BODY_AHEAD: Position = Position { x: 9, y: 12 };
-const INITIAL_SNAKE_BODY_BEHIND: Position = Position { x: 8, y: 12 };
-const INITIAL_DIRECTION: Direction = Direction::Right;
-const INITIAL_FOOD_POSITION: Position = Position { x: 20, y: 12 };
+pub const MIN_AVAILABLE_COORDINATE: i32 = 0;
 
 fn is_within_bounds(value: i32, max_inclusive: i32) -> bool {
     value >= MIN_AVAILABLE_COORDINATE && value <= max_inclusive
@@ -31,14 +23,6 @@ fn is_within_bounds(value: i32, max_inclusive: i32) -> bool {
 
 pub fn is_inside_board(position: Position) -> bool {
     is_within_bounds(position.x, WIDTH - 1) && is_within_bounds(position.y, HEIGHT - 1)
-}
-
-pub fn initial_setup() -> GameStateSetup {
-    GameStateSetup {
-        snake: Snake::new(Vec::from([INITIAL_SNAKE_HEAD, INITIAL_SNAKE_BODY_AHEAD, INITIAL_SNAKE_BODY_BEHIND])),
-        food: Food::new(INITIAL_FOOD_POSITION),
-        direction: INITIAL_DIRECTION,
-    }
 }
 
 fn is_immediate_reversal(current: Direction, candidate: Direction) -> bool {
@@ -50,12 +34,6 @@ pub enum GameStatus {
     WaitingToStart,
     Playing,
     GameOver,
-}
-
-pub struct GameStateSetup {
-    pub snake: Snake,
-    pub food: Food,
-    pub direction: Direction,
 }
 
 #[derive(Debug, Clone)]
