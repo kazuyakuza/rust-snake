@@ -16,12 +16,30 @@ pub const HEIGHT: i32 = 25;
 const INITIAL_SCORE: i32 = 0;
 const MIN_AVAILABLE_COORDINATE: i32 = 0;
 
+const INITIAL_SNAKE_HEAD: Position = Position { x: 10, y: 12 };
+const INITIAL_SNAKE_BODY_AHEAD: Position = Position { x: 9, y: 12 };
+const INITIAL_SNAKE_BODY_BEHIND: Position = Position { x: 8, y: 12 };
+const INITIAL_DIRECTION: Direction = Direction::Right;
+const INITIAL_FOOD_POSITION: Position = Position { x: 20, y: 12 };
+
 fn is_within_bounds(value: i32, max_inclusive: i32) -> bool {
     value >= MIN_AVAILABLE_COORDINATE && value <= max_inclusive
 }
 
 pub fn is_inside_board(position: Position) -> bool {
     is_within_bounds(position.x, WIDTH - 1) && is_within_bounds(position.y, HEIGHT - 1)
+}
+
+pub fn initial_setup() -> GameStateSetup {
+    GameStateSetup {
+        snake: Snake::new(Vec::from([INITIAL_SNAKE_HEAD, INITIAL_SNAKE_BODY_AHEAD, INITIAL_SNAKE_BODY_BEHIND])),
+        food: Food::new(INITIAL_FOOD_POSITION),
+        direction: INITIAL_DIRECTION,
+    }
+}
+
+fn is_immediate_reversal(current: Direction, candidate: Direction) -> bool {
+    candidate == current.opposite()
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -75,5 +93,18 @@ impl GameState {
 
     pub fn status(&self) -> GameStatus {
         self.status
+    }
+
+    pub fn change_direction(&mut self, new_direction: Direction) -> bool {
+        if is_immediate_reversal(self.current_direction, new_direction) {
+            return false;
+        }
+        self.current_direction = new_direction;
+        true
+    }
+
+    pub fn advance_one_step(&mut self) {
+        let next_head = self.snake.head() + self.current_direction.offset();
+        self.snake.advance(next_head, true);
     }
 }
