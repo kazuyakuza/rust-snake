@@ -21,6 +21,8 @@ impl Direction {
         }
     }
 
+    /// One-cell grid offset for this direction, in terminal-grid orientation:
+    /// `y` grows downward, so `Up` decreases `y`.
     pub fn offset(self) -> Position {
         match self {
             Direction::Up => Position { x: ZERO_GRID_STEP, y: -SINGLE_GRID_STEP },

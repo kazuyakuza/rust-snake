@@ -16,6 +16,9 @@ pub const HEIGHT: i32 = 25;
 const INITIAL_SCORE: i32 = 0;
 const MIN_AVAILABLE_COORDINATE: i32 = 0;
 
+// Head-to-tail start: `HEAD` leads and moves `Right`, `BODY_AHEAD` sits adjacent
+// to it, and `BODY_BEHIND` is the tail tip. The initial food shares row 12 but
+// stays clear of every snake cell and inside the playable area.
 const INITIAL_SNAKE_HEAD: Position = Position { x: 10, y: 12 };
 const INITIAL_SNAKE_BODY_AHEAD: Position = Position { x: 9, y: 12 };
 const INITIAL_SNAKE_BODY_BEHIND: Position = Position { x: 8, y: 12 };
@@ -95,6 +98,9 @@ impl GameState {
         self.status
     }
 
+    /// Steer the snake, rejecting an immediate reversal into itself. Returns
+    /// `true` when the direction changed, or `false` when `new_direction` is
+    /// directly opposite the current one (the direction is then left unchanged).
     pub fn change_direction(&mut self, new_direction: Direction) -> bool {
         if is_immediate_reversal(self.current_direction, new_direction) {
             return false;
@@ -103,6 +109,7 @@ impl GameState {
         true
     }
 
+    /// Advance the snake one cell along its current direction as a length-preserving step.
     pub fn advance_one_step(&mut self) {
         let next_head = self.snake.head() + self.current_direction.offset();
         self.snake.advance(next_head, true);

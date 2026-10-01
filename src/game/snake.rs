@@ -1,5 +1,5 @@
 //! An ordered chain of positions: `segments[0]` is the head, followed by body
-//! segments toward the tail. Movement and growth (later phases) must preserve this
+//! segments toward the tail. Movement and growth (`advance`) preserve this
 //! head-first ordering.
 
 use crate::game::position::Position;
@@ -27,6 +27,9 @@ impl Snake {
         self.segments.len()
     }
 
+    /// Insert `next_head` at the front; drop the last segment when
+    /// `should_remove_tail`, which preserves the length, or retain it so the
+    /// snake grows by exactly one segment.
     pub fn advance(&mut self, next_head: Position, should_remove_tail: bool) {
         self.segments.insert(0, next_head);
         if should_remove_tail {
