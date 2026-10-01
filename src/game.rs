@@ -1,3 +1,4 @@
+pub mod collision;
 pub mod direction;
 pub mod food;
 pub mod food_placement;
