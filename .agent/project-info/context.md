@@ -21,8 +21,10 @@
 
 ## Implementation Status
 
-- **Not implemented yet**: no `Cargo.toml`, no `Cargo.lock`, no `Dockerfile`, no `compose.yaml`, no Rust source (`src/` contains only `.gitkeep`); the `dist/` output directory does not exist yet.
-- All build/game runtime details described in `architecture.md` and `tech.md` are the PLANNED design from `brief.md`, marked as pending until implemented.
+- **Implemented (Phase 1A Group A — TODO tasks 1–4):** the Cargo foundation (`Cargo.toml`, package `snake`, sole dependency `rand`) and the core game domain types (`src/main.rs`, `src/game.rs`, `src/game/{position,direction,snake,food,state}.rs`), including board dimensions (`WIDTH = 40`, `HEIGHT = 25`) and the canonical playable-bounds predicate centralized in `src/game/state.rs`.
+- **Pending (later Phase 1A groups):** initial game-state setup, direction handling, movement, growth, food placement, consumption/scoring, and collision detection (Groups B/C — TODO tasks 5–13); core-logic tests (Group D — TODO task 14). The `GameStatus` variants exist but are not yet transitioned, and no game logic runs yet.
+- **Still absent:** no `Cargo.lock`, `Dockerfile`, `compose.yaml`, or `dist/` output. Nothing has been compiled — the Rust/Cargo toolchain is intentionally not installed here, so all code is hand-written and manually verified (no cargo execution in this workflow).
+- Terminal rendering, arrow-key input, the interactive game loop, and Docker builds remain out of scope for Phase 1A (see the TODO's Out-of-Scope list); details in `architecture.md`/`tech.md` for these remain the planned design.
 
 ---
 

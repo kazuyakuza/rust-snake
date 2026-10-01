@@ -1,3 +1,10 @@
+//! Board dimensions and the canonical playable bounds for the game grid.
+//!
+//! `WIDTH`/`HEIGHT` are cell counts (not terminal pixels). A coordinate is on the
+//! board when it lies in the inclusive range `MIN_AVAILABLE_COORDINATE..=WIDTH - 1`
+//! (`x`) or `..=HEIGHT - 1` (`y`); anything outside is a boundary collision, with no
+//! wrap-around.
+
 use crate::game::direction::Direction;
 use crate::game::food::Food;
 use crate::game::position::Position;

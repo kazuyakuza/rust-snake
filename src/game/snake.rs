@@ -1,3 +1,7 @@
+//! An ordered chain of positions: `segments[0]` is the head, followed by body
+//! segments toward the tail. Movement and growth (later phases) must preserve this
+//! head-first ordering.
+
 use crate::game::position::Position;
 
 #[derive(Debug, Clone, PartialEq, Eq)]

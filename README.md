@@ -87,13 +87,13 @@ Understanding the purpose of the configuration directories is key to effective d
 
 ### Application Files (Planned)
 
-Defined by the project brief — **not yet implemented**:
+The application files defined by the project brief. The Cargo manifest and the game source now exist (Phase 1A foundation); the Docker/build artifacts are still planned:
 
-- `Cargo.toml` — Rust package manifest for the Cargo project.
+- `Cargo.toml` — Rust package manifest for the Cargo project *(present)*.
 - `Cargo.lock` — locked dependency versions.
 - `Dockerfile` — Docker image for the Windows cross-compilation build environment.
 - `compose.yaml` — Compose service that runs the `build` command.
-- `src/main.rs` — the game source code (initially all code in one file).
+- `src/main.rs` — crate entry point; the game source is organized under the `src/game` module tree *(present)*.
 - `dist/snake.exe` — Windows executable produced by the Docker build (git-ignored output).
 
 ## Getting Started
