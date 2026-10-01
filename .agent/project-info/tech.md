@@ -46,3 +46,9 @@
 - Exact terminal characters for snake body/head, food, and borders — decided during implementation (brief §5).
 - Exact Rust data-structure layout for `Snake`/`Game` — left to the implementation (brief §14).
 - Random number generation approach — a Rust learning objective in the brief; crate vs. hand-rolled choice is an implementation decision (brief §15).
+
+---
+
+## Important Note for AI Agents
+
+Agents working on this project must follow the onboarding, workflows, and rules in [AGENTS.md](../../AGENTS.md), and treat [brief.md](brief.md) as the source of truth for scope.

@@ -12,6 +12,7 @@ Rust Snake is a terminal Snake game written in Rust, built by AI agents through 
 - [Game Rules & Controls](#game-rules--controls)
 - [Build & Run](#build--run)
 - [Project Structure](#project-structure)
+  - [Application Files (Planned)](#application-files-planned)
 - [Getting Started](#getting-started)
 - [The Critical Workflow](#the-critical-workflow)
 - [Agent Models](#agent-models)

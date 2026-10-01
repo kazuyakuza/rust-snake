@@ -96,3 +96,9 @@ Suggested model — exact structure left to the implementation (brief §14):
 - Build: `docker compose run --rm build` → host-mounted output `dist/snake.exe` (brief §3).
 - Run: execute `dist/snake.exe` directly on Windows terminal, outside the container (brief §3).
 - Develop: read `AGENTS.md` → `.agent/WORKFLOWS.md` → Critical Workflow (`.kilo/commands/critical-workflow.md`); project context lives in `.agent/project-info/*`.
+
+---
+
+## Important Note for AI Agents
+
+Agents working on this project must follow the onboarding, workflows, and rules in [AGENTS.md](../../AGENTS.md), and treat [brief.md](brief.md) as the source of truth for scope.

@@ -56,3 +56,9 @@ These may be considered in future experiments, but they are outside the initial 
 - **Controls** (items 7–8): arrow keys control the direction; the snake cannot immediately reverse direction.
 - **Food & score** (items 9–12, 15): food appears at a valid random position; eating food increases score by 1 and length by 1; the food respawns; the score is displayed during gameplay.
 - **Game over** (items 13–14, 16–17): hitting the boundary and hitting the snake's own body each cause Game Over; Game Over displays the final score; a key press exits the application.
+
+---
+
+## Important Note for AI Agents
+
+Agents working on this project must follow the onboarding, workflows, and rules in [AGENTS.md](../../AGENTS.md), and treat [brief.md](brief.md) as the source of truth for scope.
