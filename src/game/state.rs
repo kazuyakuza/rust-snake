@@ -126,7 +126,7 @@ impl GameState {
     }
 
     fn respawn_food(&mut self) {
-        let occupied: Vec<Position> = self.snake.segments().to_vec();
+        let occupied = self.snake.segments().to_vec();
         if let Some(new_food_position) = food_placement::choose_food_position(&occupied) {
             self.food = Food::new(new_food_position);
         }
