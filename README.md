@@ -1,6 +1,6 @@
-# Base Project for AI Agent Driven Development
+# Rust Snake
 
-This project serves as a foundational template for future AI-agent driven development. It is pre-configured with essential rules, workflows, and structures optimized for collaboration between human developers and AI agents (specifically Kilo Code and opencode).
+Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. It is compiled inside Docker for Windows, and the resulting `dist/snake.exe` runs directly in the Windows terminal.
 
 **Attention AI Agents:** Before making any changes, you **must** read and adhere to the guidelines outlined in [`AGENTS.md`](AGENTS.md). This file contains critical information about the project's workflow, rules, and architectural standards.
 
@@ -9,10 +9,12 @@ This project serves as a foundational template for future AI-agent driven develo
 - [Compatibility](#compatibility)
 - [Prerequisites](#prerequisites)
 - [About this Project](#about-this-project)
+- [Game Rules & Controls](#game-rules--controls)
+- [Build & Run](#build--run)
 - [Project Structure](#project-structure)
+- [Getting Started](#getting-started)
 - [The Critical Workflow](#the-critical-workflow)
 - [Agent Models](#agent-models)
-- [Getting Started (New Project Setup)](#getting-started-new-project-setup)
 - [How to Start a Task](#how-to-start-a-task)
   - [Option 1: Using a TODO File (Recommended)](#option-1-using-a-todo-file-recommended)
   - [Option 2: Direct Chat Request](#option-2-direct-chat-request)
@@ -21,9 +23,9 @@ This project serves as a foundational template for future AI-agent driven develo
 
 ## Compatibility
 
-This template is **used on a daily basis with the Kilo Code VSCode plugin**, always running on its latest version (Kilo Code tested version > **7.4.22**).
+This project setup is **used on a daily basis with the Kilo Code VSCode plugin**, always running on its latest version (Kilo Code tested version > **7.4.22**).
 
-Currently, the template is also **being tested with opencode**. For that purpose, opencode-specific settings were added to the project in [`.opencode/`](.opencode/), mainly the [`opencode.json`](.opencode/opencode.json) configuration file plus its own agent and command definitions. The rules are shared from `.kilo/rules/` — no duplication.
+Currently, this project is also **being tested with opencode**. For that purpose, opencode-specific settings were added to the project in [`.opencode/`](.opencode/), mainly the [`opencode.json`](.opencode/opencode.json) configuration file plus its own agent and command definitions. The rules are shared from `.kilo/rules/` — no duplication.
 
 The project is developed with an [**opencode Go**](https://opencode.ai/go?ref=ZHA0GMN860) subscription (see the list below). In addition to the opencode Go models, the agent setup has also been tested with other model providers, such as **Grok**, **Gemini**, and **custom models hosted on vast.ai**.
 
@@ -38,32 +40,70 @@ The project uses standard Markdown-based configuration (`.kilo/`, `.opencode/`, 
 
 ## Prerequisites
 
-The only hard requirement is **Git**. On top of it, you need an AI agent handler tool to drive the project — **Kilo Code** and **opencode** are the two tools this template is tested with, but any similar app should work:
+The only hard requirement is **Git**. On top of it, you need an AI agent handler tool to drive the project — **Kilo Code** and **opencode** are the two tools this project is tested with, but any similar app should work:
 
 - **Git** — Required. Ensure your environment is configured for the workflow. See [`how-to-set-up-git.md`](docs/how-to-set-up-git.md).
 - **Kilo Code** or **opencode** — the tested AI agent tools (VSCode plugin/CLI for Kilo Code; CLI for opencode). See the [Compatibility](#compatibility) section for details.
 - **Any other AI agent handler app/software** — as long as it supports custom sub-agent definitions, rule files, and workflow commands via markdown-based configuration.
+- **Docker** — required to build: Windows Cross compilation runs in a Docker build environment producing a Windows .exe.
 
 ## About this Project
 
-The primary goal of this repository is to provide a clean, structured starting point for new projects with built-in "AI-Readiness."
+Rust Snake is a classic Snake game played in a Windows terminal: the player steers a continuously moving snake with the arrow keys, collects food, and avoids the walls and its own body.
 
-### Design Principles
+It is a learning and experimentation project for Rust fundamentals (structs, enums, collections, ownership/borrowing, loops, input handling, timers, modules) — not a production-quality game.
 
-- **Foundation**: A structured baseline for new repositories.
-- **AI-Readiness**: Integrated configurations (like `.kilo`, `.agent`, and `.kilocodeignore`) to enable immediate and effective AI agent participation.
-- **Standardization**: Established coding standards, workflows, and documentation practices.
-- **Project Info**: A persistent context and knowledge management system for agents.
+Docker is used only as the compile environment; the build output runs directly on Windows (see [Build & Run](#build--run)).
+
+## Game Rules & Controls
+
+- Board: 40 x 25 logical grid with visible boundaries and no wrap-around.
+- Snake starts at length 3 (1 head + 2 body), moving continuously, initial direction right.
+- Controls: arrow keys change direction; movement continues between ticks; immediate reversal into itself is rejected.
+- Speed: fixed 120 ms per move (~8.3 moves/s), constant, no acceleration.
+- Food: exactly one on the board; spawns randomly, never on the snake; eating it = score +1, length +1, respawn.
+- Score displayed during gameplay, e.g. `Score: 7`.
+- Game over on boundary hit or self collision; shows final score; exits on key press; no restart in the initial version.
+- Start screen: press any key to start.
+
+## Build & Run
+
+- Build (expected workflow): `docker compose run --rm build`.
+- Output: Windows executable `dist/snake.exe` in a host-mounted output directory.
+- Run: execute `dist/snake.exe` directly from Windows — the container is only the compile environment.
+- Status: the Docker build environment and Cargo project are being implemented; see [`.agent/project-info/tech.md`](.agent/project-info/tech.md) for the full build contract.
+- `dist/` is git-ignored (`.gitignore`), so binaries never get committed.
 
 ## Project Structure
 
 Understanding the purpose of the configuration directories is key to effective development:
 
-- [`.agent/`](.agent/): Stores project-specific agent context. Includes [`.agent/project-info/`](.agent/project-info/) for persistent project knowledge, the [`.agent/todos/`](.agent/todos/) directory for task tracking, and the [`project-structure.md`](.agent/project-structure.md) map. The core knowledge files (`brief.md`, `product.md`, `context.md`, `architecture.md`, `tech.md`) plus the behavior guide `instructions.md` live here; the project-specific ones are created during Project Info initialization (see below).
+- [`.agent/`](.agent/): Stores project-specific agent context. Includes [`.agent/project-info/`](.agent/project-info/) for persistent project knowledge, the [`.agent/todos/`](.agent/todos/) directory for task tracking, and the [`project-structure.md`](.agent/project-structure.md) map. The core knowledge files (`brief.md`, `product.md`, `context.md`, `architecture.md`, `tech.md`) plus the behavior guide `instructions.md` live here; Project Info is initialized — all of them exist.
 - [`.kilo/`](.kilo/): The operational core of the Kilo Code AI integration. Contains custom [`.kilo/agents/`](.kilo/agents/) (Planner, Architector, Implementer, Code Reviewer, Code Simplifier, Docs Specialist, Frontend Specialist, etc.), global [`.kilo/rules/`](.kilo/rules/) (22 rule files), standardized [`.kilo/commands/`](.kilo/commands/) (workflows like the Critical Workflow), and the [`.kilo/plans/`](.kilo/plans/) directory where agents store detailed implementation plans.
 - [`.opencode/`](.opencode/): The operational core for **opencode** users. Contains [`.opencode/agents/`](.opencode/agents/) and [`.opencode/commands/`](.opencode/commands/) (the same agent/command definitions as `.kilo/`), configured via [`opencode.json`](.opencode/opencode.json). Rules are shared from `.kilo/rules/` — no duplication.
 - [`.ignore`](.ignore): The opencode equivalent of `.kilocodeignore` — the same patterns (lock files, build outputs, media, etc.). It is the block list for the [`opencode-ignore`](https://github.com/lgladysz/opencode-ignore) plugin (registered in [`.opencode/opencode.json`](.opencode/opencode.json)), which blocks `read`/`edit`/`write`/`glob`/`grep`/`list` on matching files, and is also honored natively by opencode's search tools. `.env` reads are denied by default by opencode.
 - [`.kilocodeignore`](.kilocodeignore): Controls which files are excluded from codebase indexing, skipping lock files, dependency directories, build outputs, and binary assets.
+
+### Application Files (Planned)
+
+Defined by the project brief — **not yet implemented**:
+
+- `Cargo.toml` — Rust package manifest for the Cargo project.
+- `Cargo.lock` — locked dependency versions.
+- `Dockerfile` — Docker image for the Windows cross-compilation build environment.
+- `compose.yaml` — Compose service that runs the `build` command.
+- `src/main.rs` — the game source code (initially all code in one file).
+- `dist/snake.exe` — Windows executable produced by the Docker build (git-ignored output).
+
+## Getting Started
+
+1. **Read [`AGENTS.md`](AGENTS.md)** — the primary source of instructions for AI agents.
+2. **Project info is already initialized** — the brief at [`.agent/project-info/brief.md`](.agent/project-info/brief.md) and the core files (`product.md`, `context.md`, `architecture.md`, `tech.md`) exist; the `.initialized` template marker has been removed.
+3. **Follow the Critical Workflow** — start tasks as described in [How to Start a Task](#how-to-start-a-task).
+4. **Build and play** — once implementation lands, use [Build & Run](#build--run) to compile in Docker and play Snake in the Windows terminal.
+5. **Keep context current** — every task adds entries to or updates [`.agent/project-info/context.md`](.agent/project-info/context.md) per the [project info instructions](.agent/project-info/instructions.md).
+
+> **Note on Project Info:** [`.agent/project-info/brief.md`](.agent/project-info/brief.md) is the source of truth for the project's requirements and scope. All project info lives in [`.agent/project-info/`](.agent/project-info/). AI agents read the project info instructions at the start of every task and keep `context.md` up to date with recent changes, current state, and next steps.
 
 ## The Critical Workflow
 
@@ -109,16 +149,6 @@ A recommended starting point, balancing quality and cost:
 - **Execution roles** — [Implementer](.kilo/agents/implementer.md), [Code Simplifier](.kilo/agents/code-simplifier.md), [Docs Specialist](.kilo/agents/docs-specialist.md): use a fast, capable model (e.g., a Claude Haiku-class model) for the well-defined steps coming from the plan.
 
 The workflow and sub-agent prompts are model-independent, so you can tune each agent's model freely to your preferences and budget.
-
-## Getting Started (New Project Setup)
-
-1. **Write the project brief** — Define the project's core requirements and scope in `.agent/project-info/brief.md`. AI agents rely on it for context across sessions; if it's not defined, agents may produce work that does not align with your goals.
-2. **Set up Git** — Configure Git for the workflow and store your credentials. See [`how-to-set-up-git.md`](docs/how-to-set-up-git.md).
-3. **Initialize project info** — Ask the planner agent to read the brief and initialize the project info, either by creating a TODO file as described in [Option 1: Using a TODO File (Recommended)](#option-1-using-a-todo-file-recommended), or by typing the request directly in the chat as described in [Option 2: Direct Chat Request](#option-2-direct-chat-request).
-
-4. **Work with the planner** — From now on, just ask the planner agent to work through TODO files, or include tasks directly in the chat. See [How to Start a Task](#how-to-start-a-task).
-
-> **Note on Project Info:** When cloning this template for a new project, the Project Info initialization workflow triggers automatically (it detects the `.agent/project-info/.initialized` marker file). The file `.agent/project-info/brief.md` defines the project's core requirements and scope — AI agents rely on it for context across sessions. To initialize, run `/critical-workflow` and ask to "initialize project info". See [`.kilo/commands/project-info-init.md`](.kilo/commands/project-info-init.md) for details. If the project brief is not defined, agents may produce work that does not align with your goals.
 
 ## How to Start a Task
 
