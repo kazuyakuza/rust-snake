@@ -7,7 +7,8 @@
 # Rust project files
 
 - Cargo.toml - Cargo package manifest (package `snake`, sole dependency `rand`)
-- src/main.rs - crate entry point; declares the `game` module
+- src/lib.rs - library crate root; exposes the `game` module to the binary and the integration tests
+- src/main.rs - binary entry point (`fn main()`); the game module is reached through `src/lib.rs`, not declared here
 - src/game.rs - `game` module root; declares the `game/*` submodules
 - src/game/position.rs - grid cell coordinate value type (`x`, `y`)
 - src/game/direction.rs - movement direction enum with opposite-direction detection
@@ -17,6 +18,17 @@
 - src/game/state.rs - game state, board dimensions and playable bounds, status transitions, and the per-tick move/consume/collide driver
 - src/game/collision.rs - death predicates for one step: boundary exit and tail-aware body overlap
 - src/game/food_placement.rs - random free-cell food placement with explicit board-full handling
+
+# Integration tests (tests/)
+
+Headless integration tests for the deterministic core logic; run via `cargo test` (execution arrives with the Docker build phase). Each file imports the game module through the library crate (`snake::game::*`).
+
+- tests/initial_state.rs - initial snake (length/head/segments), score, direction, status, and in-bounds/valid-food guarantees
+- tests/direction.rs - accepted direction changes and rejection of immediate reversals
+- tests/movement_and_growth.rs - per-step head/body movement, length preservation, the pre-play status gate, and `Snake::advance` growth/normal-step semantics
+- tests/food_consumption_scoring.rs - food consumption at arrival, score increment, growth-by-one, and post-consumption respawn validity
+- tests/collision.rs - boundary exit (unit + wall-death without wrap-around) and tail-aware self-collision predicates
+- tests/food_placement.rs - food-placement guarantees: in-bounds, never on an occupied cell, last-free-cell `Some`, full-board `None`
 
 # Not yet present (later phases)
 
