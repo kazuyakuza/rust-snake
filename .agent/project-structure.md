@@ -2,7 +2,7 @@
 
 # Folders in src/
 
-- src/game/ - core game domain module tree (`position`, `direction`, `snake`, `food`, `state`)
+- src/game/ - core game domain module tree (`position`, `direction`, `snake`, `food`, `setup`, `state`, `collision`, `food_placement`)
 
 # Rust project files
 
@@ -13,7 +13,10 @@
 - src/game/direction.rs - movement direction enum with opposite-direction detection
 - src/game/snake.rs - snake as an ordered, head-first collection of positions
 - src/game/food.rs - food newtype wrapping a `Position`
-- src/game/state.rs - game state + status, board dimensions, and playable-bounds predicate
+- src/game/setup.rs - initial game setup: starting snake/food/direction constants and the `GameStateSetup` seed
+- src/game/state.rs - game state, board dimensions and playable bounds, status transitions, and the per-tick move/consume/collide driver
+- src/game/collision.rs - death predicates for one step: boundary exit and tail-aware body overlap
+- src/game/food_placement.rs - random free-cell food placement with explicit board-full handling
 
 # Not yet present (later phases)
 

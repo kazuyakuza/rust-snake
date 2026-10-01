@@ -1,9 +1,11 @@
-//! Board dimensions and the canonical playable bounds for the game grid.
+//! Central game state: board dimensions and playable bounds, the status state
+//! machine, and the per-tick move/consume/collide driver.
 //!
-//! `WIDTH`/`HEIGHT` are cell counts (not terminal pixels). A coordinate is on the
-//! board when it lies in the inclusive range `MIN_AVAILABLE_COORDINATE..=WIDTH - 1`
-//! (`x`) or `..=HEIGHT - 1` (`y`); anything outside is a boundary collision, with no
-//! wrap-around.
+//! `WIDTH`/`HEIGHT` are cell counts (not terminal pixels); a coordinate is inside
+//! the board when it lies in the inclusive range `MIN_AVAILABLE_COORDINATE..=WIDTH - 1`
+//! (`x`) or `..=HEIGHT - 1` (`y`), with no wrap-around. `GameState` owns the snake,
+//! food, direction, score, and `GameStatus`; `advance_one_step` resolves a single
+//! move: boundary and self collisions, food consumption, and status transitions.
 
 use crate::game::collision;
 use crate::game::direction::Direction;
@@ -117,14 +119,20 @@ impl GameState {
         self.status == GameStatus::Playing
     }
 
+    /// Begin play: the `WaitingToStart -> Playing` edge. The domain never starts
+    /// itself; the later terminal phase calls this after the start key is pressed.
     pub fn start_playing(&mut self) {
         self.status = GameStatus::Playing;
     }
 
+    /// End the game: the `-> GameOver` edge, reached when `advance_one_step`
+    /// detects a boundary exit or a body collision.
     pub fn enter_game_over(&mut self) {
         self.status = GameStatus::GameOver;
     }
 
+    /// Put the food on a fresh free cell. If the board is full, the current food
+    /// stays put: board-full is not a loss condition, so nothing here ends the game.
     fn respawn_food(&mut self) {
         let occupied = self.snake.segments().to_vec();
         if let Some(new_food_position) = food_placement::choose_food_position(&occupied) {
