@@ -1,3 +1,8 @@
+use crate::game::position::Position;
+
+const ZERO_GRID_STEP: i32 = 0;
+const SINGLE_GRID_STEP: i32 = 1;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
     Up,
@@ -13,6 +18,15 @@ impl Direction {
             Direction::Down => Direction::Up,
             Direction::Left => Direction::Right,
             Direction::Right => Direction::Left,
+        }
+    }
+
+    pub fn offset(self) -> Position {
+        match self {
+            Direction::Up => Position { x: ZERO_GRID_STEP, y: -SINGLE_GRID_STEP },
+            Direction::Down => Position { x: ZERO_GRID_STEP, y: SINGLE_GRID_STEP },
+            Direction::Left => Position { x: -SINGLE_GRID_STEP, y: ZERO_GRID_STEP },
+            Direction::Right => Position { x: SINGLE_GRID_STEP, y: ZERO_GRID_STEP },
         }
     }
 }
