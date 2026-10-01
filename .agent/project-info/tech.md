@@ -12,6 +12,7 @@
 
 - Docker is used only as the compilation environment; the resulting executable must run directly on Windows outside the container (brief §3).
 - The Docker image contains everything required to compile the Rust project for the Windows target (brief §3) — no local Rust toolchain is described by the brief.
+- Current Phase 1A workflow: all Rust code is hand-written and manually reviewed; `cargo build`/`cargo test` execution awaits the Docker phase.
 - AI-agent tooling: Kilo Code and/or opencode, per [AGENTS.md](../../AGENTS.md) (both already configured in this repo).
 
 ---
@@ -21,7 +22,8 @@
 - Build command: `docker compose run --rm build` (brief §3 expected workflow).
 - Output: Windows executable in a host-mounted output directory `dist/snake.exe`; run it directly with `snake.exe` from Windows (brief §3).
 - Required project files for this to work: `Dockerfile`, `compose.yaml`, `Cargo.toml`, `src/` (brief §3 minimum list).
-- Note: none of these files exist yet — implementation pending.
+- Status: `Cargo.toml` and `src/` are implemented (Phase 1A). `Dockerfile`, `compose.yaml`, and `Cargo.lock` remain planned — the Docker build phase will create and compile them.
+- Tests: six integration test files under `tests/` are authored but **not yet executed**; they require a Rust/Cargo toolchain provided by the Docker build environment.
 
 ---
 
@@ -29,7 +31,7 @@
 
 - Fixed game speed 120 ms per movement; no acceleration required (brief §7).
 - No restart system, no persistence, no configuration files (brief §12, §16).
-- Terminal-only rendering budget: keep the implementation in `main.rs` unless growth justifies modules (brief §17).
+- Terminal-only rendering budget: the core domain is organized into `src/game/` modules (Phase 1A); the terminal layer will be introduced in later phases as needed (brief §17).
 
 ---
 
@@ -43,9 +45,9 @@
 
 ## Pending Decisions
 
-- Exact terminal characters for snake body/head, food, and borders — decided during implementation (brief §5).
-- Exact Rust data-structure layout for `Snake`/`Game` — left to the implementation (brief §14).
-- Random number generation approach — a Rust learning objective in the brief; crate vs. hand-rolled choice is an implementation decision (brief §15).
+- Exact terminal characters for snake body/head, food, and borders — decided during implementation (brief §5). *Still open (Phase 1B).*
+- ~~Exact Rust data-structure layout for `Snake`/`Game`~~ — resolved in Phase 1A: ordered head-first `Vec<Position>` for `Snake`, struct `GameState` (see `src/game/`).
+- ~~Random number generation approach~~ — resolved in Phase 1A: the `rand` crate is the sole dependency (see `Cargo.toml`).
 
 ---
 
