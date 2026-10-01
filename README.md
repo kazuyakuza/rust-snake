@@ -1,6 +1,6 @@
 # Rust Snake
 
-Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. It is compiled inside Docker for Windows, and the resulting `dist/snake.exe` runs directly in the Windows terminal.
+Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. The core game model and its deterministic tests are implemented; a Docker-based Windows build that produces `dist/snake.exe` is planned for the next phase.
 
 **Attention AI Agents:** Before making any changes, you **must** read and adhere to the guidelines outlined in [`AGENTS.md`](AGENTS.md). This file contains critical information about the project's workflow, rules, and architectural standards.
 
@@ -18,7 +18,7 @@ Rust Snake is a classic Snake game played in a Windows terminal: the player stee
 
 It is a learning and experimentation project for Rust fundamentals (structs, enums, collections, ownership/borrowing, loops, input handling, timers, modules) — not a production-quality game.
 
-Docker is used only as the compile environment; the build output runs directly on Windows (see [Build & Run](#build--run)).
+A Docker-based Windows build that produces `dist/snake.exe` is planned for a later phase (see [Build & Run](#build--run)).
 
 ## Game Rules & Controls
 
