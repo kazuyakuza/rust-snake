@@ -13,4 +13,8 @@ impl Food {
     pub fn position(&self) -> Position {
         self.position
     }
+
+    pub fn occupies(&self, position: Position) -> bool {
+        self.position == position
+    }
 }

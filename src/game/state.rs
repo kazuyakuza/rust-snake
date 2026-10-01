@@ -5,8 +5,10 @@
 //! (`x`) or `..=HEIGHT - 1` (`y`); anything outside is a boundary collision, with no
 //! wrap-around.
 
+use crate::game::collision;
 use crate::game::direction::Direction;
 use crate::game::food::Food;
+use crate::game::food_placement;
 use crate::game::position::Position;
 use crate::game::setup::GameStateSetup;
 use crate::game::snake::Snake;
@@ -16,6 +18,7 @@ pub const HEIGHT: i32 = 25;
 
 const INITIAL_SCORE: i32 = 0;
 pub const MIN_AVAILABLE_COORDINATE: i32 = 0;
+const SCORE_INCREMENT: i32 = 1;
 
 fn is_within_bounds(value: i32, max_inclusive: i32) -> bool {
     value >= MIN_AVAILABLE_COORDINATE && value <= max_inclusive
@@ -87,9 +90,45 @@ impl GameState {
         true
     }
 
-    /// Advance the snake one cell along its current direction as a length-preserving step.
+    /// Advance one playing tick: move onto the next cell, or end the game on a
+    /// boundary or self collision. Does nothing unless the game is playing.
     pub fn advance_one_step(&mut self) {
+        if !self.is_playing() {
+            return;
+        }
         let next_head = self.snake.head() + self.current_direction.offset();
-        self.snake.advance(next_head, true);
+        if collision::is_outside_board(next_head) {
+            self.enter_game_over();
+            return;
+        }
+        if collision::collides_with_body(next_head, self.snake.segments()) {
+            self.enter_game_over();
+            return;
+        }
+        let will_consume = self.food.occupies(next_head);
+        self.snake.advance(next_head, !will_consume);
+        if will_consume {
+            self.score += SCORE_INCREMENT;
+            self.respawn_food();
+        }
+    }
+
+    fn is_playing(&self) -> bool {
+        self.status == GameStatus::Playing
+    }
+
+    pub fn start_playing(&mut self) {
+        self.status = GameStatus::Playing;
+    }
+
+    pub fn enter_game_over(&mut self) {
+        self.status = GameStatus::GameOver;
+    }
+
+    fn respawn_food(&mut self) {
+        let occupied: Vec<Position> = self.snake.segments().to_vec();
+        if let Some(new_food_position) = food_placement::choose_food_position(&occupied) {
+            self.food = Food::new(new_food_position);
+        }
     }
 }
