@@ -26,4 +26,11 @@ impl Snake {
     pub fn length(&self) -> usize {
         self.segments.len()
     }
+
+    pub fn advance(&mut self, next_head: Position, should_remove_tail: bool) {
+        self.segments.insert(0, next_head);
+        if should_remove_tail {
+            self.segments.pop();
+        }
+    }
 }
