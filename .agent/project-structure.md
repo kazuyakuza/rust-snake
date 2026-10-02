@@ -9,7 +9,7 @@
 
 - Cargo.toml - Cargo package manifest (package snake, dependencies rand and crossterm)
 - src/lib.rs - library crate root; exposes the game and terminal modules to the binary and the integration tests
-- src/main.rs - binary entry point (`fn main()`); the game module is reached through `src/lib.rs`, not declared here
+- src/main.rs - binary entry point; wires initial setup, terminal enable, the start screen, the playing loop, the game-over screen, and exit cleanup (screens and key-wait as private in-file helpers)
 - src/game.rs - `game` module root; declares the `game/*` submodules
 - src/game/position.rs - grid cell coordinate value type (`x`, `y`)
 - src/game/direction.rs - movement direction enum with opposite-direction detection
@@ -23,7 +23,7 @@
 - src/terminal/game_loop.rs - fixed 120 ms playing loop: drains arrow directions, advances the domain, renders, and sleeps the tick remainder
 - src/terminal/renderer.rs - full-frame board renderer over an io::Write output (borders, snake, food, score line)
 - src/terminal/input.rs - arrow key press to game Direction mapping plus non blocking drains of the last event and of all buffered directions
-- src/terminal/lifecycle.rs - raw mode, alternate screen and cursor visibility with Drop guard cleanup
+- src/terminal/lifecycle.rs - raw mode, alternate screen and cursor visibility with Drop guard cleanup plus an output accessor
 
 # Integration tests (tests/)
 
