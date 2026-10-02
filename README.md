@@ -56,12 +56,12 @@ A compact Rust project; the game domain is split into small modules under `src/g
 
 - [`Cargo.toml`](Cargo.toml): the Cargo manifest (package `snake`, dependency `rand`).
 - `src/lib.rs`: library entry; exposes the `game` module for tests and future phases.
-- `src/main.rs`: binary entry point; `fn main()` is still empty, and wiring the implemented terminal loop into it (plus the start/game-over screens) arrives in the next group.
+- `src/main.rs`: binary entry point; wires initial setup, terminal enable, the start screen, the playing loop, the game-over screen, and exit cleanup.
 - [`src/game.rs`](src/game.rs): `game` module root; declares the domain submodules.
 - `src/game/position.rs`, `src/game/direction.rs`, `src/game/snake.rs`, `src/game/food.rs`: core value types (grid cell, direction, head-first snake, food).
 - `src/game/setup.rs`, `src/game/state.rs`: initial setup + game state with the per-tick move/consume/collide driver.
 - `src/game/collision.rs`, `src/game/food_placement.rs`: death predicates and random free-cell food placement.
-- `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/game_loop.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, timed playing loop, terminal lifecycle) — start/game-over screens and `main` wiring arrive in the next group.
+- `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/game_loop.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, timed playing loop, terminal lifecycle).
 - `tests/`: integration tests for the deterministic core logic (`cargo test` runs them; execution arrives with the Docker build phase).
 - Planned later: `Dockerfile`, `compose.yaml`, `Cargo.lock`, `dist/snake.exe`.
 
