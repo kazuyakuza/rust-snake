@@ -18,11 +18,13 @@ const VERTICAL_GLYPH: char = '|';
 const SCORE_PREFIX: &str = "Score: ";
 const LINE_BREAK: &str = "\r\n";
 
+/// Full-frame renderer that writes the board frame and score line to an owned output.
 pub struct Renderer<W: Write> {
     output: W,
 }
 
 impl<W: Write> Renderer<W> {
+    /// Create a renderer that writes its frames to `output`.
     pub fn new(output: W) -> Renderer<W> {
         Renderer { output }
     }
@@ -30,19 +32,14 @@ impl<W: Write> Renderer<W> {
     /// Draw the complete frame for `state` at the home position, without scrolling.
     pub fn render(&mut self, state: &GameState) -> io::Result<()> {
         queue!(self.output, MoveTo(0, 0))?;
-        self.write_top_border()?;
+        self.write_border_row()?;
         self.write_board_rows(state)?;
-        self.write_bottom_border()?;
+        self.write_border_row()?;
         self.write_score_line(state)?;
         self.output.flush()
     }
 
-    fn write_top_border(&mut self) -> io::Result<()> {
-        let border_text = rendered_border_row();
-        self.write_line(&border_text)
-    }
-
-    fn write_bottom_border(&mut self) -> io::Result<()> {
+    fn write_border_row(&mut self) -> io::Result<()> {
         let border_text = rendered_border_row();
         self.write_line(&border_text)
     }
