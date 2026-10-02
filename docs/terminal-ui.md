@@ -6,17 +6,20 @@ this file is the module map and integration contract.
 
 ## Status
 
-Implemented now (Phase 1B, Group A): the renderer, arrow-key input mapping, and
-lifecycle guard. **Not yet present** (later groups): the game loop, the
-start / game-over screens, and the `main.rs` wiring that connects them. No local
-Rust toolchain is configured in this environment — `cargo build` and `cargo test`
-run later in the Docker build phase; do not assume they execute here.
+Implemented now (Phase 1B, Groups A and B): the renderer, arrow-key input
+mapping, lifecycle guard, and the game loop (`run_playing_loop`, `tick`) with
+its chronological arrow-directions drain. **Not yet present** (Group C): the
+start / game-over screens and the `main.rs` wiring that connects them; test
+execution arrives with the Docker build phase (Phase 2). No local Rust
+toolchain is configured in this environment — `cargo build` and `cargo test`
+do not run here.
 
 ## File Map
 
 | Path | Responsibility |
 | --- | --- |
-| `src/terminal.rs` | Module root; declares the `input`, `lifecycle`, `renderer` submodules. |
+| `src/terminal.rs` | Module root; declares the `game_loop`, `input`, `lifecycle`, `renderer` submodules. |
+| `src/terminal/game_loop.rs` | Fixed 120 ms playing loop and headless one-tick function. |
 | `src/terminal/renderer.rs` | Full-frame board draw (borders, snake, food, score) to any `io::Write`. |
 | `src/terminal/input.rs` | Arrow-key press to `Direction` mapping and non-blocking event drain. |
 | `src/terminal/lifecycle.rs` | Raw mode / alternate screen / cursor toggle with a Drop-cleanup guard. |
@@ -64,6 +67,18 @@ Input (`src/terminal/input.rs`):
   - Polls with `Duration::ZERO` (never blocks), consumes all pending events, and
     returns the last arrow-key press seen, if any.
 
+Game loop (`src/terminal/game_loop.rs`):
+
+- `run_playing_loop(&mut GameState, &mut Renderer<W>) -> io::Result<()>` —
+  precondition `status() == Playing`; per tick: drain → apply → advance →
+  render → sleep remainder; returns after rendering the final frame once status
+  leaves `Playing`.
+- `tick(&mut GameState, &[Direction], &mut Renderer<W>) -> io::Result<GameStatus>` —
+  one headless transition, no sleep/terminal read; Group-D test hook (drives a
+  `Vec<u8>` renderer).
+- `drain_arrow_directions() -> io::Result<Vec<Direction>>` — all buffered arrow
+  presses chronologically, never blocks.
+
 Lifecycle (`src/terminal/lifecycle.rs`):
 
 - `TerminalHandle::enable(output: W) -> io::Result<TerminalHandle<W>>`
@@ -75,15 +90,16 @@ Lifecycle (`src/terminal/lifecycle.rs`):
 - `Drop for TerminalHandle` calls `disable()` and ignores errors, so a leaked or
   early-returned handle still restores the terminal.
 
-## How the Next Group Wires It (planned, not yet implemented)
+## How the Next Group Connects It (planned, not yet implemented)
 
-The intended `main` / game-loop flow — to be added when the loop lands:
+The playing loop itself is implemented (`run_playing_loop`); the surrounding
+`main` wiring arrives with the next group:
 
 1. Create a `TerminalHandle` over the chosen output and a `Renderer` writing to
    that output.
-2. Each tick: `drain_arrow_event()` → `map_key_event_to_direction()` → apply the
-   direction to `GameState` (the domain rejects reversals) → advance movement →
-   `Renderer::render(&state)`.
+2. Each tick: `drain_arrow_directions()` → `run_playing_loop` applies
+   `change_direction` (the domain rejects reversals) → `advance_one_step()` →
+   `Renderer::render(&state)` → sleep the remainder of the tick.
 3. On game-over: stop the loop, present the final score, wait for a key press,
    then exit. Returning/dropping the `TerminalHandle` restores the terminal.
 
