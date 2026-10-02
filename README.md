@@ -61,7 +61,7 @@ A compact Rust project; the game domain is split into small modules under `src/g
 - `src/game/position.rs`, `src/game/direction.rs`, `src/game/snake.rs`, `src/game/food.rs`: core value types (grid cell, direction, head-first snake, food).
 - `src/game/setup.rs`, `src/game/state.rs`: initial setup + game state with the per-tick move/consume/collide driver.
 - `src/game/collision.rs`, `src/game/food_placement.rs`: death predicates and random free-cell food placement.
-- `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, terminal lifecycle) — interactive wiring arrives in the next group.
+- `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/game_loop.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, timed playing loop, terminal lifecycle) — start/game-over screens and `main` wiring arrive in the next group.
 - `tests/`: integration tests for the deterministic core logic (`cargo test` runs them; execution arrives with the Docker build phase).
 - Planned later: `Dockerfile`, `compose.yaml`, `Cargo.lock`, `dist/snake.exe`.
 
