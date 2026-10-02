@@ -58,3 +58,24 @@ fn is_arrow_key_press(event: &KeyEvent) -> bool {
 fn is_arrow_key(event: &KeyEvent) -> bool {
     map_key_event_to_direction(event).is_some()
 }
+
+/// Drain all currently available input events without waiting, and return the
+/// arrow-key directions seen, in chronological order. Never blocks.
+pub fn drain_arrow_directions() -> io::Result<Vec<Direction>> {
+    let mut directions = Vec::new();
+    while event::poll(Duration::ZERO)? {
+        if let Some(direction) = read_arrow_direction() {
+            directions.push(direction);
+        }
+    }
+    Ok(directions)
+}
+
+fn read_arrow_direction() -> Option<Direction> {
+    let event = event::read().ok()?;
+    let key_event = match event {
+        Event::Key(key_event) => key_event,
+        _ => return None,
+    };
+    map_key_event_to_direction(&key_event)
+}
