@@ -2,13 +2,14 @@
 
 ## Current Work Focus
 
-- Phase 1B (Terminal Gameplay & Interaction — TODO `.agent/todos/20261001/20261001-todo-3-DONE.md`) is **complete**: all 10 tasks implemented and marked `[DONE]`. The terminal layer — full-frame renderer, arrow-key input, the fixed 120 ms game loop, and the start/game-over screens — is now wired into `src/main.rs`, so the executable drives the whole flow (start prompt → playing loop → game-over → exit). Work landed on branch `feat/phase1b-terminal-game`, merged to `main` at `3d2d995` and pushed to `origin`; the feature branch was deleted after the merge. Version bumped to `0.2.0`; `crossterm 0.29` added as the terminal-handling dependency alongside `rand`.
-- Next up: Phase 2 (TODO `.agent/todos/20261001/20261001-todo-4.md`) — the Docker build environment (`Dockerfile` + `compose.yaml` → `dist/snake.exe`), the first real compilation, and execution of the authored test suite. **No Rust/Cargo toolchain has run any code yet** — every source and test file is hand-written and manually verified only.
+- Phase 2 (Windows Build Infrastructure — TODO `.agent/todos/20261001/20261001-todo-4.md`) is **implemented**: all 10 tasks `[DONE]` after Group C. `Dockerfile` (pinned `rust:1.98.1-slim-bookworm`, mingw-w64, `x86_64-pc-windows-gnu`), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`, rewritten README Build & Run, refreshed structure map and project info) have landed on branch `feat/phase2-docker-windows-build`; merge/push happens in workflow step 5. The build itself is executed by the user outside this workflow.
+- Next up: user runs `docker compose run --rm build` (first real compilation + `Cargo.lock` generation), then manual Windows validation of `dist/snake.exe` per brief §18.
 
 ---
 
 ## Recent Changes
 
+- **Phase 2 (Windows Build Infrastructure)** implemented on branch `feat/phase2-docker-windows-build`, executed in three groups tracked by TODO `.agent/todos/20261001/20261001-todo-4.md`: Group A (tasks 1–4) build infra — version bump to 0.3.0 (`4ac280a`), mingw-w64 linker config (`30d3f95`), Dockerfile (`0a04d7c`), compose build service (`1587f72`); Group B (tasks 5–7) artifact convention/single command in the compose header (`f79cafe`), no-helper-script decision recorded; Group C (tasks 8–10) documentation — `docs/BUILD.md`, README rewrite, structure map + project info updates, plus `[DONE]` marks (`93a738e`, `8de56a5`, and the Group C commits). Plan: [`.kilo/plans/20261002-phase2-groupC-documentation.md`](../../.kilo/plans/20261002-phase2-groupC-documentation.md); adherence report: [`.kilo/plans/20261002-phase2-groupC-adherence.md`](../../.kilo/plans/20261002-phase2-groupC-adherence.md).
 - **Phase 1B (Terminal Gameplay & Interaction)** completed on branch `feat/phase1b-terminal-game` (merged to `main` at `3d2d995`), executed in four groups tracked by TODO `.agent/todos/20261001/20261001-todo-3-DONE.md`:
   - Group A (tasks 1–4): terminal primitives — the full-frame board renderer (`src/terminal/renderer.rs`), arrow-key input mapping plus non-blocking event drain (`src/terminal/input.rs`), and the raw-mode / alternate-screen / cursor lifecycle guard (`src/terminal/lifecycle.rs`). Supporting commits: version bump `e3c239b` (→ `0.2.0`), `crossterm` dependency + `target/` gitignore `2c4f528`, library-root exposure `565f331`.
   - Group B: the fixed 120 ms playing loop and a headless `tick` driver (`src/terminal/game_loop.rs`), wired into the loop and refined (`c17f029` fixed-tick loop, `269950a` chronological arrow drain, `fbf70ad` module declaration).
@@ -40,8 +41,8 @@
 - **Implemented (Phase 1B Group B — game loop):** `game_loop.rs` runs a fixed `TICK_DURATION = 120 ms` loop while `state.status() == Playing` — each tick drains buffered arrow directions chronologically, applies them via `change_direction`, calls `advance_one_step`, renders once, then sleeps the remainder of the tick; a headless `tick` helper performs the same step without sleeping or touching the real terminal (the test seam). The final losing frame is rendered before the loop returns.
 - **Implemented (Phase 1B Group C — screens + wiring):** `main.rs` is the full-flow driver — build state via `initial_setup()`, enable `TerminalHandle` over `stdout()`, show the start screen (`Press any key to start`), block on any key press, `start_playing()`, run `run_playing_loop`, show the game-over screen (`GAME OVER` / blank / `Score: N` / blank / `Press any key to exit`), block on any key press, then exit (terminal restored by `TerminalHandle`'s `Drop`). The `TerminalHandle::output()` accessor lets the screens and the renderer share one owned stdout.
 - **Implemented (Phase 1B Group D — tests):** 15 new headless test functions — `tests/gameplay_flow.rs` (4 — the complete start → play → game-over → exit flow driven over an in-memory buffer) and `tests/terminal_modules.rs` (11 — input mapping, drain semantics, `tick` semantics, and renderer output). Like all Phase 1A/1B tests they are **authored only, never executed** — no compilation has run in this workflow.
-- **Pending (Phase 2):** first real `cargo build` / `cargo test` and Docker packaging. Phase 1A's open gap is now closed — `start_playing` has a production caller (the key-press trigger in `main.rs`).
-- **Still absent:** no `Cargo.lock`, `Dockerfile`, `compose.yaml`, or `dist/` output. Nothing has been compiled — the Rust/Cargo toolchain is intentionally not installed here, so all code is hand-written and manually verified (no cargo execution in this workflow).
+- **Implemented (Phase 2):** the Docker-based Windows build workflow — pinned image, compose build service, artifact convention, documented command and docs — is complete as authored work.
+- **Still absent:** no `Cargo.lock` or `dist/` output yet (both are produced by the user's first `docker compose run --rm build`); `dist/` and `target/` are git-ignored; the 59 authored test functions have never been executed — no cargo toolchain in this context.
 - The domain logic in `src/game/` remains the **untouched source of truth** for game rules; the Phase 1B terminal layer only reads `GameState`, drives it through the existing `advance_one_step`/`change_direction`/`start_playing` API, and renders it — it adds no game rules.
 
 ---
@@ -50,10 +51,10 @@
 
 Order matters — this is the project's live roadmap (Phase 2, TODO `.agent/todos/20261001/20261001-todo-4.md`):
 
-1. Establish the Docker build environment: `Dockerfile` + `compose.yaml` so `docker compose run --rm build` compiles the crate and emits `dist/snake.exe` (brief §3); this also generates the first `Cargo.lock`.
-2. Run the full authored test suite in Docker — Phase 1A's six test files plus Phase 1B's two new files (`tests/gameplay_flow.rs` and `tests/terminal_modules.rs`), i.e. 59 `#[test]` functions across 8 integration files — and fix any failures surfaced by the first real compilation.
+1. Run `docker compose run --rm build` to perform the first real compilation, generate `Cargo.lock`, and produce `dist/snake.exe` (see `docs/BUILD.md`).
+2. Commit the generated `Cargo.lock` and verify `dist/snake.exe` exists; report any compile errors back into a fix TODO.
 3. Manually validate gameplay on Windows by running `dist/snake.exe` against the Definition of Done checklist in `brief.md` §18 (start screen, 3-block initial snake, continuous movement, arrow controls, no immediate reversal, food/score/growth, boundary and self game-over, score display, key-press exit).
-4. After the phase, update project info per `instructions.md` ("Project Info Update") — especially `context.md`.
+4. Optionally execute the authored test suite (`cargo test` in a Rust/Docker environment) in a later phase — not part of the current build command.
 
 ---
 
