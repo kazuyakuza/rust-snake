@@ -8,6 +8,7 @@ Rust Snake is a terminal Snake game written in Rust, built by AI agents through 
 
 - [About this Project](#about-this-project)
 - [Game Rules & Controls](#game-rules--controls)
+- [Terminal UI (Phase 1B)](#terminal-ui-phase-1b)
 - [Build & Run](#build--run)
 - [Project Structure](#project-structure)
 - [AI Agents](#ai-agents)
@@ -30,6 +31,16 @@ A Docker-based Windows build that produces `dist/snake.exe` is planned for a lat
 - Score displayed during gameplay, e.g. `Score: 7`.
 - Game over on boundary hit or self collision; shows final score; exits on key press; no restart in the initial version.
 - Start screen: press any key to start.
+
+## Terminal UI (Phase 1B)
+
+The terminal layer primitives are implemented (crossterm 0.29); the interactive wiring (game loop, start/game-over screens, `main` hookup) is the next group and is not present yet.
+
+- **Renderer** (`src/terminal/renderer.rs`): `Renderer<W: io::Write>` draws a full frame — ASCII borders, distinct snake head/body glyphs, food, and a `Score: N` line — moving the cursor to home each tick so the board redraws in place without scrolling. It reads state only; it holds no game logic.
+- **Input** (`src/terminal/input.rs`): `map_key_event_to_direction` translates an arrow-key press into a game `Direction`, and `drain_arrow_event` collects pending events without blocking. Immediate-reversal rejection is **not** done here — it stays in the domain rules under `src/game`, which remain the single source of truth for movement.
+- **Lifecycle** (`src/terminal/lifecycle.rs`): `TerminalHandle` enables raw mode + the alternate screen and hides the cursor, then restores all three on `disable()` or on `Drop` (including error paths), so the terminal is never left in a hidden-cursor or raw-input state.
+
+The renderer and handle are generic over `io::Write`, so frames can be validated headlessly against an in-memory buffer before an interactive terminal is available. Full module map and integration notes: [`docs/terminal-ui.md`](docs/terminal-ui.md).
 
 ## Build & Run
 
