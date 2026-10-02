@@ -1,6 +1,14 @@
 # Windows release build workflow: docker compose run --rm build
+# Convention: source in src/ (+ tests/), Docker/build configuration in
+# Dockerfile + compose.yaml + .cargo/config.toml, generated binaries in
+# dist/. dist/ is gitignored — build artifacts are never committed.
 # Output on the host: dist/snake.exe (artifact only — target/ stays
 # inside the container; Cargo.lock is written back to the project root).
+# No helper script or Cargo wrapper is added: docker compose run --rm build
+# already is the single build entry point, and any helper could only wrap
+# this same command (a thin wrapper with a single caller behind it adds a
+# second name for the same command).
+#
 services:
   build:
     build: .
