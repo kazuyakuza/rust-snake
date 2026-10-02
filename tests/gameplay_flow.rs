@@ -25,8 +25,6 @@
 //! the identical order `main.rs` uses: setup -> start gate -> start_playing ->
 //! ticks -> collision -> GameOver -> final score preserved.
 
-use std::io;
-
 use snake::game::direction::Direction;
 use snake::game::food::Food;
 use snake::game::position::Position;

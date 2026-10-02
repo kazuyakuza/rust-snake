@@ -1,12 +1,8 @@
-use std::io;
-
 use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, KeyEventState};
 
 use snake::game::direction::Direction;
-use snake::game::food::Food;
 use snake::game::position::Position;
-use snake::game::setup::{GameStateSetup, initial_setup};
-use snake::game::snake::Snake;
+use snake::game::setup::initial_setup;
 use snake::game::state::{GameStatus, GameState, HEIGHT};
 use snake::terminal::game_loop::tick;
 use snake::terminal::renderer::Renderer;
