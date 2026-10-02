@@ -32,6 +32,11 @@ impl<W: Write> TerminalHandle<W> {
         report_first_error(restore_result, raw_mode_result)
     }
 
+    /// Borrow the wrapped output for screen writing.
+    pub fn output(&mut self) -> &mut W {
+        &mut self.output
+    }
+
     fn write_restore_commands(&mut self) -> io::Result<()> {
         queue!(self.output, cursor::Show, LeaveAlternateScreen)?;
         self.output.flush()
