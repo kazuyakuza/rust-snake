@@ -1,6 +1,6 @@
 # Rust Snake
 
-Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. The core game model and its deterministic tests are implemented; a Docker-based Windows build that produces `dist/snake.exe` is planned for the next phase.
+Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. The core game model and its deterministic tests are implemented; *covered by the Docker build infrastructure — see [Build & Run](#build--run)*.
 
 **Attention AI Agents:** Before making any changes, you **must** read and adhere to the guidelines outlined in [`AGENTS.md`](AGENTS.md). This file contains critical information about the project's workflow, rules, and architectural standards.
 
@@ -19,7 +19,7 @@ Rust Snake is a classic Snake game played in a Windows terminal: the player stee
 
 It is a learning and experimentation project for Rust fundamentals (structs, enums, collections, ownership/borrowing, loops, input handling, timers, modules) — not a production-quality game.
 
-A Docker-based Windows build that produces `dist/snake.exe` is planned for a later phase (see [Build & Run](#build--run)).
+The Windows executable is built with Docker — see [Build & Run](#build--run) and the [Windows Build Guide](docs/BUILD.md).
 
 ## Game Rules & Controls
 
@@ -34,7 +34,7 @@ A Docker-based Windows build that produces `dist/snake.exe` is planned for a lat
 
 ## Terminal UI (Phase 1B)
 
-The terminal layer is now wired end to end in [`src/main.rs`](src/main.rs): it builds the initial game state, enables the terminal, shows a **start screen** (`Press any key to start`), waits for any key press, transitions the domain state to `Playing` via `start_playing`, and hands off to the fixed 120 ms playing loop (`run_playing_loop` in [`src/terminal/game_loop.rs`](src/terminal/game_loop.rs)) — each tick drains the pending arrow-key directions, applies them through the domain's `change_direction` (which still rejects immediate reversals), advances one step, renders a single frame, then sleeps the remainder of the interval, exiting once the game status leaves `Playing`. On game over, `main` shows a **game-over screen** with the final score (`GAME OVER` / `Score: N` / `Press any key to exit`), waits for a key press, and returns; the terminal handle is then dropped, restoring the real terminal. There is no restart flow. The `main` screen helpers (`show_start_screen`, `show_game_over_screen`, `wait_for_any_key_press`) are private to the binary. `tick` is a headless one-tick function so the loop's state transitions can be validated without a terminal; those tests execute in the Docker build phase (Phase 2), and the full start→play→game-over→exit flow is validated manually by running the built binary in a real terminal.
+The terminal layer is now wired end to end in [`src/main.rs`](src/main.rs): it builds the initial game state, enables the terminal, shows a **start screen** (`Press any key to start`), waits for any key press, transitions the domain state to `Playing` via `start_playing`, and hands off to the fixed 120 ms playing loop (`run_playing_loop` in [`src/terminal/game_loop.rs`](src/terminal/game_loop.rs)) — each tick drains the pending arrow-key directions, applies them through the domain's `change_direction` (which still rejects immediate reversals), advances one step, renders a single frame, then sleeps the remainder of the interval, exiting once the game status leaves `Playing`. On game over, `main` shows a **game-over screen** with the final score (`GAME OVER` / `Score: N` / `Press any key to exit`), waits for a key press, and returns; the terminal handle is then dropped, restoring the real terminal. There is no restart flow. The `main` screen helpers (`show_start_screen`, `show_game_over_screen`, `wait_for_any_key_press`) are private to the binary. `tick` is a headless one-tick function so the loop's state transitions can be validated without a terminal; those tests remain authored-only in the repository (the Docker build command performs the release build, not a test run), and the full start→play→game-over→exit flow is validated manually by running the built binary in a real Windows terminal.
 
 - **Renderer** (`src/terminal/renderer.rs`): `Renderer<W: io::Write>` draws a full frame — ASCII borders, distinct snake head/body glyphs, food, and a `Score: N` line — moving the cursor to home each tick so the board redraws in place without scrolling. It reads state only; it holds no game logic.
 - **Input** (`src/terminal/input.rs`): `map_key_event_to_direction` translates an arrow-key press into a game `Direction`; `drain_arrow_directions` collects every pending arrow press in chronological order without blocking (the drain `run_playing_loop` applies each tick). Immediate-reversal rejection is **not** done here — it stays in the domain rules under `src/game`, which remain the single source of truth for movement.
@@ -42,15 +42,25 @@ The terminal layer is now wired end to end in [`src/main.rs`](src/main.rs): it b
 
 The renderer and handle are generic over `io::Write`, so frames can be validated headlessly against an in-memory buffer before an interactive terminal is available. Full module map and integration notes: [`docs/terminal-ui.md`](docs/terminal-ui.md).
 
-Two headless integration test files extend the suite for Phase 1B: [`tests/gameplay_flow.rs`](tests/gameplay_flow.rs) covers the start gate, move/eat/grow ticks, and boundary & self-collision `GameOver`, and [`tests/terminal_modules.rs`](tests/terminal_modules.rs) covers arrow-key mapping, `tick` semantics, and renderer snapshots captured through a `&mut Vec<u8>` buffer. All fifteen new tests (four flow + eleven terminal-module), like the six Phase 1A ones, are authored and executed in the Phase 2 Docker phase; interactive play (`dist/snake.exe`) stays manual.
+Two headless integration test files extend the suite for Phase 1B: [`tests/gameplay_flow.rs`](tests/gameplay_flow.rs) covers the start gate, move/eat/grow ticks, and boundary & self-collision `GameOver`, and [`tests/terminal_modules.rs`](tests/terminal_modules.rs) covers arrow-key mapping, `tick` semantics, and renderer snapshots captured through a `&mut Vec<u8>` buffer. All fifteen new tests (four flow + eleven terminal-module), like the six Phase 1A ones, are authored in Phase 1B; interactive play (`dist/snake.exe`) stays manual.
 
 ## Build & Run
 
-- Build (expected workflow): `docker compose run --rm build`.
-- Output: Windows executable `dist/snake.exe` in a host-mounted output directory.
-- Run: execute `dist/snake.exe` directly from Windows — the container is only the compile environment.
-- Status: the Cargo project, the core game model, and its core logic tests are implemented; the Docker build environment is planned for the next phase (`Dockerfile` + `compose.yaml` do not exist yet).
-- `dist/` is git-ignored (`.gitignore`), so binaries never get committed.
+- Build the Windows executable with the single documented command:
+
+      docker compose run --rm build
+
+- The image (Rust `1.98.1` + mingw-w64, target `x86_64-pc-windows-gnu`) builds
+  implicitly from [`Dockerfile`](Dockerfile) via [`compose.yaml`](compose.yaml);
+  no host Rust toolchain is needed.
+- Output on the host: `dist/snake.exe` (define build parameters inside
+  `compose.yaml`/`Dockerfile`, not on the command line). `dist/` is
+  git-ignored, so binaries never get committed; `Cargo.lock` is written back
+  to the project root by the build and should be committed once generated.
+- Run: copy the single artifact `dist/snake.exe` to a Windows machine and
+  execute it directly from a Windows terminal — Windows runtime validation
+  is a separate manual step, NOT part of the Docker build.
+- Full prerequisites and step-by-step workflow: [`docs/BUILD.md`](docs/BUILD.md).
 
 ## Project Structure
 
@@ -64,8 +74,11 @@ A compact Rust project; the game domain is split into small modules under `src/g
 - `src/game/setup.rs`, `src/game/state.rs`: initial setup + game state with the per-tick move/consume/collide driver.
 - `src/game/collision.rs`, `src/game/food_placement.rs`: death predicates and random free-cell food placement.
 - `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/game_loop.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, timed playing loop, terminal lifecycle).
-- `tests/`: integration tests for the deterministic core logic — six Phase 1A files plus `tests/gameplay_flow.rs` and `tests/terminal_modules.rs` from Phase 1B (`cargo test` runs them; execution arrives with the Docker build phase).
-- Planned later: `Dockerfile`, `compose.yaml`, `Cargo.lock`, `dist/snake.exe`.
+- `tests/`: integration tests for the deterministic core logic — six Phase 1A files plus `tests/gameplay_flow.rs` and `tests/terminal_modules.rs` from Phase 1B (execution still requires the Cargo toolchain inside Docker; the documented build command performs the release build — see [Build & Run](#build--run)).
+- `.cargo/config.toml`: mingw-w64 linker configuration for the `x86_64-pc-windows-gnu` target.
+- [`Dockerfile`](Dockerfile) and [`compose.yaml`](compose.yaml): pinned Docker cross-compilation environment (`rust:1.98.1-slim-bookworm`) and the `build` service producing `dist/snake.exe`.
+- `Cargo.lock`: dependency lockfile — generated by the Docker build and then committed.
+- `dist/snake.exe`: generated Windows artifact (git-ignored; appears after the first build).
 
 AI agent integration (`.agent/`, `.kilo/`, `.opencode/`) is documented in [`AGENTS.md`](AGENTS.md).
 
