@@ -3,11 +3,12 @@
 # Folders in src/
 
 - src/game/ - core game domain module tree (`position`, `direction`, `snake`, `food`, `setup`, `state`, `collision`, `food_placement`)
+- src/terminal/ - terminal UI module tree (renderer, input, lifecycle)
 
 # Rust project files
 
-- Cargo.toml - Cargo package manifest (package `snake`, sole dependency `rand`)
-- src/lib.rs - library crate root; exposes the `game` module to the binary and the integration tests
+- Cargo.toml - Cargo package manifest (package snake, dependencies rand and crossterm)
+- src/lib.rs - library crate root; exposes the game and terminal modules to the binary and the integration tests
 - src/main.rs - binary entry point (`fn main()`); the game module is reached through `src/lib.rs`, not declared here
 - src/game.rs - `game` module root; declares the `game/*` submodules
 - src/game/position.rs - grid cell coordinate value type (`x`, `y`)
@@ -18,6 +19,10 @@
 - src/game/state.rs - game state, board dimensions and playable bounds, status transitions, and the per-tick move/consume/collide driver
 - src/game/collision.rs - death predicates for one step: boundary exit and tail-aware body overlap
 - src/game/food_placement.rs - random free-cell food placement with explicit board-full handling
+- src/terminal.rs - terminal module root; declares the terminal/* submodules
+- src/terminal/renderer.rs - full-frame board renderer over an io::Write output (borders, snake, food, score line)
+- src/terminal/input.rs - arrow key press to game Direction mapping plus non blocking event drain
+- src/terminal/lifecycle.rs - raw mode, alternate screen and cursor visibility with Drop guard cleanup
 
 # Integration tests (tests/)
 
