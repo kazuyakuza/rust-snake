@@ -34,10 +34,10 @@ A Docker-based Windows build that produces `dist/snake.exe` is planned for a lat
 
 ## Terminal UI (Phase 1B)
 
-The terminal layer primitives are implemented (crossterm 0.29); the interactive wiring (game loop, start/game-over screens, `main` hookup) is the next group and is not present yet.
+The terminal layer now includes the fixed 120 ms game loop (`run_playing_loop` in [`src/terminal/game_loop.rs`](src/terminal/game_loop.rs)): each tick drains the pending arrow-key directions, applies them through the domain's `change_direction` (which still rejects immediate reversals), advances one step, renders a single frame, then sleeps the remainder of the interval — exiting once the game status leaves `Playing`. The remaining interactive wiring — the start and game-over screens and the `main` hookup — is the next group and is not present yet. `tick` is a headless one-tick function so the loop's state transitions can be validated without a terminal; those tests execute in the Docker build phase (Phase 2).
 
 - **Renderer** (`src/terminal/renderer.rs`): `Renderer<W: io::Write>` draws a full frame — ASCII borders, distinct snake head/body glyphs, food, and a `Score: N` line — moving the cursor to home each tick so the board redraws in place without scrolling. It reads state only; it holds no game logic.
-- **Input** (`src/terminal/input.rs`): `map_key_event_to_direction` translates an arrow-key press into a game `Direction`, and `drain_arrow_event` collects pending events without blocking. Immediate-reversal rejection is **not** done here — it stays in the domain rules under `src/game`, which remain the single source of truth for movement.
+- **Input** (`src/terminal/input.rs`): `map_key_event_to_direction` translates an arrow-key press into a game `Direction`; `drain_arrow_directions` collects every pending arrow press in chronological order without blocking (the drain `run_playing_loop` applies each tick). Immediate-reversal rejection is **not** done here — it stays in the domain rules under `src/game`, which remain the single source of truth for movement.
 - **Lifecycle** (`src/terminal/lifecycle.rs`): `TerminalHandle` enables raw mode + the alternate screen and hides the cursor, then restores all three on `disable()` or on `Drop` (including error paths), so the terminal is never left in a hidden-cursor or raw-input state.
 
 The renderer and handle are generic over `io::Write`, so frames can be validated headlessly against an in-memory buffer before an interactive terminal is available. Full module map and integration notes: [`docs/terminal-ui.md`](docs/terminal-ui.md).
@@ -56,7 +56,7 @@ A compact Rust project; the game domain is split into small modules under `src/g
 
 - [`Cargo.toml`](Cargo.toml): the Cargo manifest (package `snake`, dependency `rand`).
 - `src/lib.rs`: library entry; exposes the `game` module for tests and future phases.
-- `src/main.rs`: binary entry point (the interactive game loop lives in a later phase).
+- `src/main.rs`: binary entry point; `fn main()` is still empty, and wiring the implemented terminal loop into it (plus the start/game-over screens) arrives in the next group.
 - [`src/game.rs`](src/game.rs): `game` module root; declares the domain submodules.
 - `src/game/position.rs`, `src/game/direction.rs`, `src/game/snake.rs`, `src/game/food.rs`: core value types (grid cell, direction, head-first snake, food).
 - `src/game/setup.rs`, `src/game/state.rs`: initial setup + game state with the per-tick move/consume/collide driver.

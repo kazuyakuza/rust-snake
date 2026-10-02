@@ -66,6 +66,10 @@ Input (`src/terminal/input.rs`):
 - `drain_arrow_event() -> io::Result<Option<KeyEvent>>`
   - Polls with `Duration::ZERO` (never blocks), consumes all pending events, and
     returns the last arrow-key press seen, if any.
+- `drain_arrow_directions() -> io::Result<Vec<Direction>>`
+  - Polls with `Duration::ZERO` (never blocks), consumes all pending events, and
+    returns every arrow-key direction in chronological order — the drain
+    `run_playing_loop` applies each tick.
 
 Game loop (`src/terminal/game_loop.rs`):
 
@@ -76,8 +80,6 @@ Game loop (`src/terminal/game_loop.rs`):
 - `tick(&mut GameState, &[Direction], &mut Renderer<W>) -> io::Result<GameStatus>` —
   one headless transition, no sleep/terminal read; Group-D test hook (drives a
   `Vec<u8>` renderer).
-- `drain_arrow_directions() -> io::Result<Vec<Direction>>` — all buffered arrow
-  presses chronologically, never blocks.
 
 Lifecycle (`src/terminal/lifecycle.rs`):
 
