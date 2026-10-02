@@ -3,7 +3,7 @@
 # Folders in src/
 
 - src/game/ - core game domain module tree (`position`, `direction`, `snake`, `food`, `setup`, `state`, `collision`, `food_placement`)
-- src/terminal/ - terminal UI module tree (renderer, input, lifecycle)
+- src/terminal/ - terminal UI module tree (game_loop, input, lifecycle, renderer)
 
 # Rust project files
 
@@ -20,8 +20,9 @@
 - src/game/collision.rs - death predicates for one step: boundary exit and tail-aware body overlap
 - src/game/food_placement.rs - random free-cell food placement with explicit board-full handling
 - src/terminal.rs - terminal module root; declares the terminal/* submodules
+- src/terminal/game_loop.rs - fixed 120 ms playing loop: drains arrow directions, advances the domain, renders, and sleeps the tick remainder
 - src/terminal/renderer.rs - full-frame board renderer over an io::Write output (borders, snake, food, score line)
-- src/terminal/input.rs - arrow key press to game Direction mapping plus non blocking event drain
+- src/terminal/input.rs - arrow key press to game Direction mapping plus non blocking drains of the last event and of all buffered directions
 - src/terminal/lifecycle.rs - raw mode, alternate screen and cursor visibility with Drop guard cleanup
 
 # Integration tests (tests/)
