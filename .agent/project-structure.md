@@ -27,7 +27,7 @@
 
 # Integration tests (tests/)
 
-Headless integration tests for the deterministic core logic; run via `cargo test` (execution arrives with the Docker build phase). Each file imports the game module through the library crate (`snake::game::*`).
+Eight headless integration test files for the deterministic core logic and the terminal flow; run via `cargo test` (execution arrives with the Docker build phase). Each file imports the modules through the library crate (`snake::game::*`, `snake::terminal::*`).
 
 - tests/initial_state.rs - initial snake (length/head/segments), score, direction, status, and in-bounds/valid-food guarantees
 - tests/direction.rs - accepted direction changes and rejection of immediate reversals
@@ -35,6 +35,8 @@ Headless integration tests for the deterministic core logic; run via `cargo test
 - tests/food_consumption_scoring.rs - food consumption at arrival, score increment, growth-by-one, and post-consumption respawn validity
 - tests/collision.rs - boundary exit (unit + wall-death without wrap-around) and tail-aware self-collision predicates
 - tests/food_placement.rs - food-placement guarantees: in-bounds, never on an occupied cell, last-free-cell `Some`, full-board `None`
+- tests/gameplay_flow.rs - complete flow through tick: start gate, eat/grow, boundary & self collisions
+- tests/terminal_modules.rs - arrow-key mapping, tick semantics, renderer snapshot via a Vec<u8> buffer
 
 # Not yet present (later phases)
 

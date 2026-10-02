@@ -6,15 +6,16 @@ this file is the module map and integration contract.
 
 ## Status
 
-Implemented now (Phase 1B, Groups A, B and C): the renderer, arrow-key input
+Implemented now (Phase 1B, Groups A, B, C and D): the renderer, arrow-key input
 mapping, lifecycle guard (incl. the `output()` accessor), and the game loop
 (`run_playing_loop`, `tick`) with its chronological arrow-directions drain, plus
 the start / game-over screens and their `src/main.rs` wiring that connects the
-whole flow end to end (start → play → game over → exit). **Not yet present**
-(Group D): automated tests; their execution arrives with the Docker build phase
-(Phase 2), as does any interactive run of the binary — there is no restart flow.
-No local Rust toolchain is configured in this environment — `cargo build` and
-`cargo test` do not run here.
+whole flow end to end (start → play → game over → exit), and fifteen headless
+tests in two new files (`tests/gameplay_flow.rs`, `tests/terminal_modules.rs`).
+The tests are authored only — no local Rust toolchain is configured in this
+environment, so execution arrives with the Docker build phase (Phase 2), as
+does any interactive run of the binary — there is no restart flow.
+`cargo build` and `cargo test` do not run here.
 
 ## File Map
 
@@ -125,6 +126,30 @@ primitives in the section above are.
 Keep every gameplay rule (movement, collision, scoring, growth) in `src/game`.
 The terminal layer and `main` stay responsible only for input, rendering,
 timing, lifecycle, and screen presentation.
+
+## Headless Tests (Group D)
+
+Fifteen headless tests were added in two files: `tests/gameplay_flow.rs`
+(four flow tests plus the `//!` static-trace walkthrough of the `main.rs`
+wiring) and `tests/terminal_modules.rs` (eleven tests). Public hooks mapped to
+their test files:
+
+- `tick` (`src/terminal/game_loop.rs`) — one-step state transitions, chrono-
+  logical direction application, reversal rejection, `GameOver` return, and
+  per-tick frame rendering: both test files.
+- `map_key_event_to_direction` (`src/terminal/input.rs`) — arrow-press to
+  `Direction` mapping, non-arrow press `None`, key release `None`:
+  `tests/terminal_modules.rs`.
+- `Renderer` over a `&mut Vec<u8>` buffer (`src/terminal/renderer.rs`) — frame
+  snapshots via byte counting (border corners, glyph counts, score line):
+  both test files.
+
+Explicit exclusions (not headless-testable; manual / Phase 2 validation only):
+`run_playing_loop` timing (the 120 ms sleeps), the real event drains
+(`drain_arrow_directions`, `drain_arrow_event`), the lifecycle guard
+(`TerminalHandle::enable`/`disable`/`Drop`), and the start / game-over screens
+with `wait_for_any_key_press` — see "How to Validate Manually" below. Test
+execution itself arrives with the Docker build phase (Phase 2).
 
 ## How to Validate Manually
 

@@ -42,6 +42,8 @@ The terminal layer is now wired end to end in [`src/main.rs`](src/main.rs): it b
 
 The renderer and handle are generic over `io::Write`, so frames can be validated headlessly against an in-memory buffer before an interactive terminal is available. Full module map and integration notes: [`docs/terminal-ui.md`](docs/terminal-ui.md).
 
+Two headless integration test files extend the suite for Phase 1B: [`tests/gameplay_flow.rs`](tests/gameplay_flow.rs) covers the start gate, move/eat/grow ticks, and boundary & self-collision `GameOver`, and [`tests/terminal_modules.rs`](tests/terminal_modules.rs) covers arrow-key mapping, `tick` semantics, and renderer snapshots captured through a `&mut Vec<u8>` buffer. All fifteen new tests (four flow + eleven terminal-module), like the six Phase 1A ones, are authored and executed in the Phase 2 Docker phase; interactive play (`dist/snake.exe`) stays manual.
+
 ## Build & Run
 
 - Build (expected workflow): `docker compose run --rm build`.
@@ -62,7 +64,7 @@ A compact Rust project; the game domain is split into small modules under `src/g
 - `src/game/setup.rs`, `src/game/state.rs`: initial setup + game state with the per-tick move/consume/collide driver.
 - `src/game/collision.rs`, `src/game/food_placement.rs`: death predicates and random free-cell food placement.
 - `src/terminal.rs`, `src/terminal/renderer.rs`, `src/terminal/input.rs`, `src/terminal/game_loop.rs`, `src/terminal/lifecycle.rs`: terminal layer primitives (board rendering, arrow-key input, timed playing loop, terminal lifecycle).
-- `tests/`: integration tests for the deterministic core logic (`cargo test` runs them; execution arrives with the Docker build phase).
+- `tests/`: integration tests for the deterministic core logic — six Phase 1A files plus `tests/gameplay_flow.rs` and `tests/terminal_modules.rs` from Phase 1B (`cargo test` runs them; execution arrives with the Docker build phase).
 - Planned later: `Dockerfile`, `compose.yaml`, `Cargo.lock`, `dist/snake.exe`.
 
 AI agent integration (`.agent/`, `.kilo/`, `.opencode/`) is documented in [`AGENTS.md`](AGENTS.md).
