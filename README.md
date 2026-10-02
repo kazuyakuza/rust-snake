@@ -56,7 +56,7 @@ Two headless integration test files extend the suite for Phase 1B: [`tests/gamep
 
 A compact Rust project; the game domain is split into small modules under `src/game/`:
 
-- [`Cargo.toml`](Cargo.toml): the Cargo manifest (package `snake`, dependency `rand`).
+- [`Cargo.toml`](Cargo.toml): the Cargo manifest (package `snake`, dependencies `rand` and `crossterm`).
 - `src/lib.rs`: library entry; exposes the `game` module for tests and future phases.
 - `src/main.rs`: binary entry point; wires initial setup, terminal enable, the start screen, the playing loop, the game-over screen, and exit cleanup.
 - [`src/game.rs`](src/game.rs): `game` module root; declares the domain submodules.
