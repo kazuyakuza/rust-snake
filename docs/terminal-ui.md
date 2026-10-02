@@ -6,13 +6,15 @@ this file is the module map and integration contract.
 
 ## Status
 
-Implemented now (Phase 1B, Groups A and B): the renderer, arrow-key input
-mapping, lifecycle guard, and the game loop (`run_playing_loop`, `tick`) with
-its chronological arrow-directions drain. **Not yet present** (Group C): the
-start / game-over screens and the `main.rs` wiring that connects them; test
-execution arrives with the Docker build phase (Phase 2). No local Rust
-toolchain is configured in this environment — `cargo build` and `cargo test`
-do not run here.
+Implemented now (Phase 1B, Groups A, B and C): the renderer, arrow-key input
+mapping, lifecycle guard (incl. the `output()` accessor), and the game loop
+(`run_playing_loop`, `tick`) with its chronological arrow-directions drain, plus
+the start / game-over screens and their `src/main.rs` wiring that connects the
+whole flow end to end (start → play → game over → exit). **Not yet present**
+(Group D): automated tests; their execution arrives with the Docker build phase
+(Phase 2), as does any interactive run of the binary — there is no restart flow.
+No local Rust toolchain is configured in this environment — `cargo build` and
+`cargo test` do not run here.
 
 ## File Map
 
@@ -22,7 +24,8 @@ do not run here.
 | `src/terminal/game_loop.rs` | Fixed 120 ms playing loop and headless one-tick function. |
 | `src/terminal/renderer.rs` | Full-frame board draw (borders, snake, food, score) to any `io::Write`. |
 | `src/terminal/input.rs` | Arrow-key press to `Direction` mapping and non-blocking event drain. |
-| `src/terminal/lifecycle.rs` | Raw mode / alternate screen / cursor toggle with a Drop-cleanup guard. |
+| `src/terminal/lifecycle.rs` | Raw mode / alternate screen / cursor toggle with a Drop-cleanup guard, exposing `output()` for shared screen writing. |
+| `src/main.rs` | Binary entry point; private screen helpers wire the full flow: setup → terminal enable → start screen → playing loop → game-over screen → exit (cleanup on drop). |
 
 The crate root `src/lib.rs` exposes `terminal` alongside `game`, so both the
 binary and the integration tests reach the terminal API through `snake::terminal`.
@@ -86,37 +89,55 @@ Lifecycle (`src/terminal/lifecycle.rs`):
 - `TerminalHandle::enable(output: W) -> io::Result<TerminalHandle<W>>`
   - Enables raw mode, enters the alternate screen, hides the cursor. If the
     screen/cursor writes fail, it disables raw mode before returning the error.
+- `TerminalHandle::output(&mut self) -> &mut W`
+  - Borrows the wrapped output stream so callers (e.g. `main`) can write the
+    start/game-over screens and hand the same stream to a `Renderer`.
 - `TerminalHandle::disable(&mut self) -> io::Result<()>`
   - Shows the cursor, leaves the alternate screen, disables raw mode; returns the
     first error encountered.
 - `Drop for TerminalHandle` calls `disable()` and ignores errors, so a leaked or
   early-returned handle still restores the terminal.
 
-## How the Next Group Connects It (planned, not yet implemented)
+## How `main.rs` Connects It (implemented)
 
-The playing loop itself is implemented (`run_playing_loop`); the surrounding
-`main` wiring arrives with the next group:
+`src/main.rs` wires the implemented pieces into the complete start→play→
+game-over→exit flow (no restart). The screen helpers below are **private** to
+the binary — they are not part of the `snake::terminal` public API; only the
+primitives in the section above are.
 
-1. Create a `TerminalHandle` over the chosen output and a `Renderer` writing to
-   that output.
-2. Each tick: `drain_arrow_directions()` → `run_playing_loop` applies
+1. Build the domain state (`GameState::new(initial_setup())`, status
+   `WaitingToStart`) and `TerminalHandle::enable(stdout())`.
+2. `show_start_screen` clears the screen and writes `Press any key to start`;
+   `wait_for_any_key_press` blocks on `event::read()` until any key **press**
+   (releases/repeats/non-key events ignored); `state.start_playing()` performs
+   the domain `WaitingToStart -> Playing` edge. The snake does not move while
+   waiting.
+3. A `Renderer` shares the handle's stream via `output()`, then
+   `run_playing_loop` runs each tick: `drain_arrow_directions()` →
    `change_direction` (the domain rejects reversals) → `advance_one_step()` →
-   `Renderer::render(&state)` → sleep the remainder of the tick.
-3. On game-over: stop the loop, present the final score, wait for a key press,
-   then exit. Returning/dropping the `TerminalHandle` restores the terminal.
+   `Renderer::render(&state)` → sleep the remainder of the tick, returning once
+   the status leaves `Playing`.
+4. `show_game_over_screen` clears the screen and writes `GAME OVER`, a blank
+   line, `Score: <n>`, a blank line, and `Press any key to exit`;
+   `wait_for_any_key_press` blocks for one more press; `main` returns `Ok(())`
+   and the dropped `TerminalHandle` restores the terminal.
 
 Keep every gameplay rule (movement, collision, scoring, growth) in `src/game`.
-The terminal layer stays responsible only for input, rendering, timing, and
-lifecycle.
+The terminal layer and `main` stay responsible only for input, rendering,
+timing, lifecycle, and screen presentation.
 
-## How to Validate Manually Later
+## How to Validate Manually
 
-Once the loop and `main` wiring exist, run `dist/snake.exe` in a real Windows
-terminal (via the Docker build phase) and check:
+The loop and `main` wiring now exist, so once the Docker build phase (Phase 2)
+produces the binary, run `dist/snake.exe` in a real Windows terminal and check:
 
+- The start screen shows `Press any key to start` and the snake stays still
+  until a key is pressed.
 - Board draws once per tick and does **not** scroll; head and body glyphs are
   distinct.
 - Arrow keys steer the snake; a press that would reverse into itself is ignored.
+- On collision the game-over screen shows `GAME OVER`, `Score: <n>`, and
+  `Press any key to exit`; the app exits after the next key press.
 - On exit (including after game over) the cursor is visible and the terminal is
   back on its normal screen in cooked input mode.
 
