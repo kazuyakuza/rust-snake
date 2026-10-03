@@ -2,14 +2,14 @@
 
 ## Current Work Focus
 
-- Phase 2 (Windows Build Infrastructure — TODO `.agent/todos/20261001/20261001-todo-4.md`) is **implemented**: all 10 tasks `[DONE]` after Group C. `Dockerfile` (pinned `rust:1.98.1-slim-bookworm`, mingw-w64, `x86_64-pc-windows-gnu`), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`, rewritten README Build & Run, refreshed structure map and project info) have landed on branch `feat/phase2-docker-windows-build`; merge/push happens in workflow step 5. The build itself is executed by the user outside this workflow.
+- Phase 2 (Windows Build Infrastructure — TODO `.agent/todos/20261001/20261001-todo-4-DONE.md`) is **complete**: all 10 tasks `[DONE]`, TODO file renamed with `-DONE`. `Dockerfile` (pinned `rust:1.98.1-slim-bookworm`, mingw-w64, `x86_64-pc-windows-gnu`), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`, rewritten README Build & Run, refreshed structure map and project info) were merged to `main` at `c2930d5`, pushed to `origin`, and the feature branch `feat/phase2-docker-windows-build` was deleted. The build itself is executed by the user outside this workflow.
 - Next up: see **Immediate Next Steps** below — first Docker build run, `Cargo.lock` commit, manual Windows validation per brief §18.
 
 ---
 
 ## Recent Changes
 
-- **Phase 2 (Windows Build Infrastructure)** implemented on branch `feat/phase2-docker-windows-build`, executed in three groups tracked by TODO `.agent/todos/20261001/20261001-todo-4.md`: Group A (tasks 1–4) build infra — version bump to 0.3.0 (`4ac280a`), mingw-w64 linker config (`30d3f95`), Dockerfile (`0a04d7c`), compose build service (`1587f72`); Group B (tasks 5–7) artifact convention/single command in the compose header (`f79cafe`), no-helper-script decision recorded; Group C (tasks 8–10) documentation — `docs/BUILD.md`, README rewrite, structure map + project info updates, plus `[DONE]` marks (`93a738e`, `8de56a5`, and the Group C commits). Plan: [`.kilo/plans/20261002-phase2-groupC-documentation.md`](../../.kilo/plans/20261002-phase2-groupC-documentation.md); adherence report: [`.kilo/plans/20261002-phase2-groupC-adherence.md`](../../.kilo/plans/20261002-phase2-groupC-adherence.md).
+- **Phase 2 (Windows Build Infrastructure)** completed on branch `feat/phase2-docker-windows-build` (merged to `main` at `c2930d5`, pushed to `origin`, branch deleted), executed in three groups tracked by TODO `.agent/todos/20261001/20261001-todo-4-DONE.md`: Group A (tasks 1–4) build infra — version bump to 0.3.0 (`4ac280a`), mingw-w64 linker config (`30d3f95`), Dockerfile (`0a04d7c`), compose build service (`1587f72`); Group B (tasks 5–7) artifact convention/single command in the compose header (`f79cafe`), no-helper-script decision recorded; Group C (tasks 8–10) documentation — `docs/BUILD.md` (`6a89098`), README rewrite (`191ec3d`), structure map + project info updates (`ae0beb5`), 4.3-fix consolidation (`955555b`, `cc07752`, `fe0bc51`), `[DONE]` marks (`93a738e`, `8de56a5`, `f4a9e7c`), TODO rename `070a103`. Plans/adherence reports: [`.kilo/plans/20261002-phase2-groupC-documentation.md`](../../.kilo/plans/20261002-phase2-groupC-documentation.md) and [`.kilo/plans/20261002-phase2-groupC-adherence.md`](../../.kilo/plans/20261002-phase2-groupC-adherence.md) (Group A/B plans committed alongside their marks). All groups assessed `ADHERENT`.
 - **Phase 1B (Terminal Gameplay & Interaction)** completed on branch `feat/phase1b-terminal-game` (merged to `main` at `3d2d995`), executed in four groups tracked by TODO `.agent/todos/20261001/20261001-todo-3-DONE.md`:
   - Group A (tasks 1–4): terminal primitives — the full-frame board renderer (`src/terminal/renderer.rs`), arrow-key input mapping plus non-blocking event drain (`src/terminal/input.rs`), and the raw-mode / alternate-screen / cursor lifecycle guard (`src/terminal/lifecycle.rs`). Supporting commits: version bump `e3c239b` (→ `0.2.0`), `crossterm` dependency + `target/` gitignore `2c4f528`, library-root exposure `565f331`.
   - Group B: the fixed 120 ms playing loop and a headless `tick` driver (`src/terminal/game_loop.rs`), wired into the loop and refined (`c17f029` fixed-tick loop, `269950a` chronological arrow drain, `fbf70ad` module declaration).
@@ -27,7 +27,7 @@
 - `README.md` adapted from the template to describe the Rust Snake project, then extended across Phase 1B to document the terminal layer, game loop, and start/game-over flow.
 - Documentation coherence pass: aligned project-info cross-links and AI-agent onboarding notes, refreshed the README table of contents, and updated the `.agent/project-structure.md` map.
 - Review cycle applied in the initial-project-info phase: simplification plan (9 dedup steps) executed in commit `fd194ee`; adherence report `ADHERENT` (`.kilo/plans/20261001-initialize-project-info-adherence.md`).
-- Branch state: both phases are now merged to `main`. Phase 1A (`f3b9a77`) and Phase 1B (`3d2d995`) sit on `main`, pushed to `origin`; the feature branches `feat/phase1a-core-game-model`, `feat/phase1b-terminal-game`, and `feat/initialize-project-info` were all merged and deleted. `main` HEAD is `3d2d995`.
+- Branch state: all phases are now merged to `main`. Phase 1A (`f3b9a77`), Phase 1B (`3d2d995`), and Phase 2 (`c2930d5`) sit on `main`, pushed to `origin`; the feature branches `feat/phase1a-core-game-model`, `feat/phase1b-terminal-game`, `feat/initialize-project-info`, and `feat/phase2-docker-windows-build` were all merged and deleted. `main` HEAD is `c2930d5`.
 
 ---
 
@@ -49,7 +49,7 @@
 
 ## Immediate Next Steps
 
-Order matters — this is the project's live roadmap (Phase 2, TODO `.agent/todos/20261001/20261001-todo-4.md`):
+Order matters — this is the project's live roadmap (post-Phase-2; the phase TODO is now `.agent/todos/20261001/20261001-todo-4-DONE.md`):
 
 1. Run `docker compose run --rm build` to perform the first real compilation, generate `Cargo.lock`, and produce `dist/snake.exe` (see `docs/BUILD.md`).
 2. Commit the generated `Cargo.lock` and verify `dist/snake.exe` exists; report any compile errors back into a fix TODO.
