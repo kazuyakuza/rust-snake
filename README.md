@@ -1,6 +1,6 @@
 # Rust Snake
 
-Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. The core game model and its deterministic tests are implemented; *covered by the Docker build infrastructure — see [Build & Run](#build--run)*.
+Rust Snake is a terminal Snake game written in Rust, built by AI agents through the Critical Workflow. The core game model and its deterministic tests are implemented; the Windows build is covered by the Docker build infrastructure — see [Build & Run](#build--run).
 
 **Attention AI Agents:** Before making any changes, you **must** read and adhere to the guidelines outlined in [`AGENTS.md`](AGENTS.md). This file contains critical information about the project's workflow, rules, and architectural standards.
 
@@ -46,21 +46,18 @@ Two headless integration test files extend the suite for Phase 1B: [`tests/gamep
 
 ## Build & Run
 
-- Build the Windows executable with the single documented command:
+- Build the Windows executable with the single documented command (no host
+  Rust toolchain needed — the pinned image builds implicitly from
+  [`Dockerfile`](Dockerfile) via [`compose.yaml`](compose.yaml); define all
+  build parameters there, not on the command line):
 
       docker compose run --rm build
 
-- The image (Rust `1.98.1` + mingw-w64, target `x86_64-pc-windows-gnu`) builds
-  implicitly from [`Dockerfile`](Dockerfile) via [`compose.yaml`](compose.yaml);
-  no host Rust toolchain is needed.
-- Output on the host: `dist/snake.exe` (define build parameters inside
-  `compose.yaml`/`Dockerfile`, not on the command line). `dist/` is
-  git-ignored, so binaries never get committed; `Cargo.lock` is written back
-  to the project root by the build and should be committed once generated.
-- Run: copy the single artifact `dist/snake.exe` to a Windows machine and
-  execute it directly from a Windows terminal — Windows runtime validation
-  is a separate manual step, NOT part of the Docker build.
-- Full prerequisites and step-by-step workflow: [`docs/BUILD.md`](docs/BUILD.md).
+- Artifact on the host: `dist/snake.exe` — copy this single file to a
+  Windows machine and run it there; Windows runtime validation is a
+  separate manual step, NOT part of the Docker build.
+- Full prerequisites and step-by-step workflow (including `dist/`
+  git-ignoring and `Cargo.lock` generation): [`docs/BUILD.md`](docs/BUILD.md).
 
 ## Project Structure
 
