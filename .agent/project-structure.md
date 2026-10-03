@@ -27,7 +27,7 @@
 
 # Integration tests (tests/)
 
-Eight headless integration test files for the deterministic core logic and the terminal flow; run via `cargo test` (execution arrives with the Docker build phase). Each file imports the modules through the library crate (`snake::game::*`, `snake::terminal::*`).
+Eight headless integration test files for the deterministic core logic and the terminal flow; run via `cargo test` (execution still requires the Cargo toolchain inside Docker; the documented build command performs the release build only — see the **Build & Run** section in [`README.md`](../README.md)). Each file imports the modules through the library crate (`snake::game::*`, `snake::terminal::*`).
 
 - tests/initial_state.rs - initial snake (length/head/segments), score, direction, status, and in-bounds/valid-food guarantees
 - tests/direction.rs - accepted direction changes and rejection of immediate reversals
