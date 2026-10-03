@@ -3,7 +3,7 @@
 ## Current Work Focus
 
 - Phase 2 (Windows Build Infrastructure — TODO `.agent/todos/20261001/20261001-todo-4.md`) is **implemented**: all 10 tasks `[DONE]` after Group C. `Dockerfile` (pinned `rust:1.98.1-slim-bookworm`, mingw-w64, `x86_64-pc-windows-gnu`), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`, rewritten README Build & Run, refreshed structure map and project info) have landed on branch `feat/phase2-docker-windows-build`; merge/push happens in workflow step 5. The build itself is executed by the user outside this workflow.
-- Next up: user runs `docker compose run --rm build` (first real compilation + `Cargo.lock` generation), then manual Windows validation of `dist/snake.exe` per brief §18.
+- Next up: see **Immediate Next Steps** below — first Docker build run, `Cargo.lock` commit, manual Windows validation per brief §18.
 
 ---
 
@@ -33,7 +33,7 @@
 
 ## Implementation Status
 
-- **Implemented (Phase 1A Group A — TODO tasks 1–4):** the Cargo foundation (`Cargo.toml`, package `snake`, `rand` dep, now version `0.2.0`) and the core game domain types (`src/game.rs`, `src/game/{position,direction,snake,food,state}.rs`), including board dimensions (`WIDTH = 40`, `HEIGHT = 25`) and the canonical playable-bounds predicate centralized in `src/game/state.rs`.
+- **Implemented (Phase 1A Group A — TODO tasks 1–4):** the Cargo foundation (`Cargo.toml`, package `snake`, `rand` dep) and the core game domain types (`src/game.rs`, `src/game/{position,direction,snake,food,state}.rs`), including board dimensions (`WIDTH = 40`, `HEIGHT = 25`) and the canonical playable-bounds predicate centralized in `src/game/state.rs`.
 - **Implemented (Phase 1A Group B — TODO tasks 5–8):** the initial game state (`initial_setup()`, now `src/game/setup.rs`, built from named `INITIAL_*` coordinate/direction/food constants — a three-segment head-first snake facing `Right`, score `0`), direction handling (`GameState::change_direction`, which rejects an immediate reversal through `Direction::opposite` and returns a `bool`), and the snake movement/growth mechanics (`Direction::offset` grid math, a `std::ops::Add` impl on `Position`, `Snake::advance` with a `should_remove_tail` flag, and `GameState::advance_one_step`).
 - **Implemented (Phase 1A Group C — TODO tasks 9–13):** random food placement (`src/game/food_placement.rs` — retries on occupied cells, returns `None` on a full board); food consumption and scoring wired into `GameState::advance_one_step` (`Food::occupies` test, `score += SCORE_INCREMENT`, growth via the tail-retention flag, respawn from the post-move snake); boundary and self collision as pure, terminal-free predicates in `src/game/collision.rs` (`is_outside_board`, tail-aware `collides_with_body`); and game-status transitions on the `GameStatus` enum (`start_playing`/`enter_game_over` plus the private `is_playing` tick gate).
 - **Implemented (Phase 1A Group D — TODO tasks 14–15):** a library/binary split — `src/lib.rs` owns the `pub mod game;` (and now `pub mod terminal;`) module trees so the domain is reachable as `snake::game::*`/`snake::terminal::*` from the binary and the `tests/` suite; six Phase 1A headless test files (`initial_state`, `direction`, `movement_and_growth`, `food_consumption_scoring`, `collision`, `food_placement`); and the `README.md` rewrite.

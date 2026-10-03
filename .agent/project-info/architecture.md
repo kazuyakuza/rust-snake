@@ -49,7 +49,6 @@ rust-snake/
     └── terminal_modules.rs    # Phase 1B: renderer/input/loop units (11 tests)
 ```
 
-- The former "Planned additions (Phase 2)" (`Cargo.lock`, `Dockerfile`, `compose.yaml`, `dist/`) are now implemented and shown as the entries in the layout above.
 - Library/binary split: `src/lib.rs` exposes the `game` and `terminal` module trees; `src/main.rs` is the thin entry point that wires the flow (it still holds no game rules — all logic lives in `src/game/`).
 - `target/` is gitignored (added with the `crossterm` dependency, commit `2c4f528`).
 - `dist/` is a host-mounted build output folder, ignored by git (`.gitignore`).

@@ -2,7 +2,7 @@
 
 ## Stack
 
-- Language: Rust (brief §2). Edition 2021, package `snake`, version `0.2.0`.
+- Language: Rust (brief §2). Edition 2021, package `snake`.
 - Target platform: Windows (brief §2).
 - UI: terminal/console only — no graphical window, no external game engine, no sprites/graphical assets; ASCII/Unicode characters represent game elements (brief §2).
 - Dependencies (`Cargo.toml`):
