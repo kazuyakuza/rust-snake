@@ -148,11 +148,16 @@ fn render_writes_the_full_frame_into_the_buffer() {
         renderer.render(&state).expect("render succeeds");
     }
 
-    assert_eq!(count_occurrences(&buffer, "+"), 4);
+    assert_eq!(count_occurrences(&buffer, "+"), 4);      // 4 corners
+    assert_eq!(count_occurrences(&buffer, "-"), 320);    // 160 per border row * 2 borders
+    assert_eq!(count_occurrences(&buffer, "|"), 160);    // 2 per board row * 80 rows
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 1);
-    assert_eq!(count_occurrences(&buffer, "●"), 1);
-    assert_eq!(count_occurrences(&buffer, "■"), 2);
-    assert_eq!(count_occurrences(&buffer, "◆"), 1);
+    assert_eq!(count_occurrences(&buffer, "\r\n"), 83);  // 80 board + 2 border + 1 score lines
+
+    // Each logical cell is now 2 terminal columns, so single-character counts double:
+    assert_eq!(count_occurrences(&buffer, "●"), 2);      // head span = 2 circles
+    assert_eq!(count_occurrences(&buffer, "█"), 4);      // 2 body cells * 2 full blocks each
+    assert_eq!(count_occurrences(&buffer, "◆"), 2);      // food span = 2 diamonds
 }
 
 #[test]
@@ -166,9 +171,9 @@ fn tick_renders_one_consistent_frame_of_glyphs() {
         tick(&mut state, &[], &mut renderer).expect("tick succeeds");
     }
 
-    assert_eq!(count_occurrences(&buffer, "●"), 1);
-    assert_eq!(count_occurrences(&buffer, "■"), 2);
-    assert_eq!(count_occurrences(&buffer, "◆"), 1);
+    assert_eq!(count_occurrences(&buffer, "●"), 2);
+    assert_eq!(count_occurrences(&buffer, "█"), 4);
+    assert_eq!(count_occurrences(&buffer, "◆"), 2);
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 1);
 }
 
@@ -185,5 +190,6 @@ fn two_renders_reuse_the_frame_without_scrolling() {
 
     assert_eq!(count_occurrences(&buffer, "+"), 8);
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 2);
-    assert_eq!(count_occurrences(&buffer, "●"), 2);
+    assert_eq!(count_occurrences(&buffer, "●"), 4);     // 2 frames * 2 head chars
+    assert_eq!(count_occurrences(&buffer, "\r\n"), 166); // 83 lines * 2 frames
 }

@@ -8,10 +8,10 @@ use crossterm::{cursor::MoveTo, queue};
 use crate::game::position::Position;
 use crate::game::state::{GameState, HEIGHT, WIDTH};
 
-const HEAD_GLYPH: char = '●';
-const BODY_GLYPH: char = '■';
-const FOOD_GLYPH: char = '◆';
-const EMPTY_GLYPH: char = ' ';
+const EMPTY_SPAN: &'static str = "  ";
+const BODY_SPAN: &'static str = "██";
+const HEAD_SPAN: &'static str = "●●";
+const FOOD_SPAN: &'static str = "◆◆";
 const CORNER_GLYPH: char = '+';
 const HORIZONTAL_GLYPH: char = '-';
 const VERTICAL_GLYPH: char = '|';
@@ -65,23 +65,23 @@ impl<W: Write> Renderer<W> {
         let mut row_text = String::new();
         row_text.push(VERTICAL_GLYPH);
         for column in 0..WIDTH {
-            row_text.push(self.cell_glyph(state, Position { x: column, y: row }));
+            row_text.push_str(self.cell_span(state, Position { x: column, y: row }));
         }
         row_text.push(VERTICAL_GLYPH);
         row_text
     }
 
-    fn cell_glyph(&self, state: &GameState, cell: Position) -> char {
+    fn cell_span(&self, state: &GameState, cell: Position) -> &'static str {
         if self.is_snake_head(state, cell) {
-            return HEAD_GLYPH;
+            return HEAD_SPAN;
         }
         if self.is_snake_body(state, cell) {
-            return BODY_GLYPH;
+            return BODY_SPAN;
         }
         if self.is_food(state, cell) {
-            return FOOD_GLYPH;
+            return FOOD_SPAN;
         }
-        EMPTY_GLYPH
+        EMPTY_SPAN
     }
 
     fn is_snake_head(&self, state: &GameState, cell: Position) -> bool {
@@ -100,7 +100,7 @@ impl<W: Write> Renderer<W> {
 fn rendered_border_row() -> String {
     let mut border_row = String::new();
     border_row.push(CORNER_GLYPH);
-    for _ in 0..WIDTH {
+    for _ in 0..(WIDTH * 2) {
         border_row.push(HORIZONTAL_GLYPH);
     }
     border_row.push(CORNER_GLYPH);
