@@ -15,8 +15,8 @@ use crate::game::position::Position;
 use crate::game::setup::GameStateSetup;
 use crate::game::snake::Snake;
 
-pub const WIDTH: i32 = 40;
-pub const HEIGHT: i32 = 25;
+pub const WIDTH: i32 = 80;
+pub const HEIGHT: i32 = 80;
 
 const INITIAL_SCORE: i32 = 0;
 pub const MIN_AVAILABLE_COORDINATE: i32 = 0;
