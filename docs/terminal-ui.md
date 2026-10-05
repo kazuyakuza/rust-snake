@@ -58,8 +58,9 @@ Renderer (`src/terminal/renderer.rs`):
   - Reads `game::state::{GameState, WIDTH, HEIGHT}` (board is 80 x 80) and the
     domain accessors `state.snake().head()` / `.segments()`, `state.food()`,
     `state.score()`.
-  - Glyphs: head `●`, body `■`, food `◆`, borders `+ - |`, score line
-    `Score: <n>`.
+  - Glyphs: each cell is a two-column span — head `●●`, body `██`, food `◆◆`,
+    empty `  `; borders stay single-character `+ - |` (border row is `-` × (2×WIDTH));
+    score line `Score: <n>`.
 
 Input (`src/terminal/input.rs`):
 

@@ -49,7 +49,7 @@
 
 ## Pending Decisions
 
-- ~~Exact terminal characters for snake body/head, food, and borders~~ — **resolved in Phase 1B** (see `src/terminal/renderer.rs`): head `●` (U+25CF), body `■` (U+25A0), food `◆` (U+25C6), empty ` ` (U+0020); ASCII borders `+` corners, `-` horizontal, `|` vertical; score line `Score: N`. Raw mode, alternate screen, cursor hiding, full-frame clear, and arrow-key input are handled through `crossterm` (brief §5, §13).
+- ~~Exact terminal characters for snake body/head, food, and borders~~ — **resolved in Phase 1B, updated 2026-10-05 (Task 4 double-width spans)** (see `src/terminal/renderer.rs`): head `●●` (U+25CF ×2), body `██` (U+2588 ×2), food `◆◆` (U+25C6 ×2), empty two spaces (U+0020 ×2); ASCII borders `+` corners, `-` ×(2×WIDTH), `|` verticals; score line `Score: N`. Raw mode, alternate screen, cursor hiding, full-frame clear, and arrow-key input are handled through `crossterm` (brief §5, §13).
 - ~~Exact Rust data-structure layout for `Snake`/`Game`~~ — resolved in Phase 1A: ordered head-first `Vec<Position>` for `Snake`, struct `GameState` (see `src/game/`).
 - ~~Random number generation approach~~ — resolved in Phase 1A: the `rand` crate (see `Cargo.toml`).
 - ~~Terminal drawing library for better console rendering~~ — **resolved 2026-10-05 (research record: `.kilo/plans/20261005-vm-context-and-crossterm-research.md`): stay with `crossterm 0.29`; `ratatui` rejected as an unnecessary widget framework on top of crossterm** (the game already renders its own full-frame ASCII board via `Renderer<W: Write>`; migration would add `CrosstermBackend`/`Terminal`/`Frame` indirection and rework the headless test buffers for zero required functionality — keep-it-simple, brief §19).
