@@ -23,7 +23,8 @@ The Windows executable is built with Docker — see [Build & Run](#build--run) a
 
 ## Game Rules & Controls
 
-- Board: 40 x 25 logical grid with visible boundaries and no wrap-around.
+- Board: 80 x 80 logical grid with visible boundaries and no wrap-around.
+- Terminal size: with the 80 x 80 board the full frame spans about 82 columns x 83 rows (borders + score line); use a terminal window of at least ~84 x 84 character cells, and enlarge or resize the window (e.g. in Windows Terminal or the classic console) if the frame looks cut off.
 - Snake starts at length 3 (1 head + 2 body), moving continuously, initial direction right.
 - Controls: arrow keys change direction; movement continues between ticks; immediate reversal into itself is rejected.
 - Speed: fixed 120 ms per move (~8.3 moves/s), constant, no acceleration.

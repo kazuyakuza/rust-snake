@@ -55,7 +55,7 @@ Renderer (`src/terminal/renderer.rs`):
 
 - `Renderer::new(output: W) -> Renderer<W>`
 - `Renderer::render(&mut self, state: &GameState) -> io::Result<()>`
-  - Reads `game::state::{GameState, WIDTH, HEIGHT}` (board is 40 x 25) and the
+  - Reads `game::state::{GameState, WIDTH, HEIGHT}` (board is 80 x 80) and the
     domain accessors `state.snake().head()` / `.segments()`, `state.food()`,
     `state.score()`.
   - Glyphs: head `●`, body `■`, food `◆`, borders `+ - |`, score line

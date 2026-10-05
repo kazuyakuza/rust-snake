@@ -98,7 +98,7 @@ Coded in `src/terminal/`; depends on `crossterm` for the platform handling and r
 
 ## Game Layout & Input Rules
 
-- Board: logical grid, initial `WIDTH = 40`, `HEIGHT = 25` cells; visible ASCII boundaries (`+` corners, `-` horizontal, `|` vertical); no screen wrap (brief §5, §8).
+- Board: logical grid, `WIDTH = 80`, `HEIGHT = 80` cells (doubled + squared per TODO 2026-10-05); visible ASCII boundaries (`+` corners, `-` horizontal, `|` vertical); no screen wrap (brief §8).
 - Cell glyphs (decided in Phase 1B): snake head `●` (U+25CF), snake body `■` (U+25A0), food `◆` (U+25C6), empty space ` `; score line rendered as `Score: N` (brief §5, §10, §13).
 - Snake starts with 1 head + 2 body segments = 3 blocks; initial direction `RIGHT` (brief §4, §13).
 - Controls: arrow keys only; movement is continuous; immediate reversal (e.g. `RIGHT` → `LEFT` in one move) is rejected by `GameState::change_direction` (brief §6).

@@ -35,6 +35,7 @@
 - Documentation coherence pass: aligned project-info cross-links and AI-agent onboarding notes, refreshed the README table of contents, and updated the `.agent/project-structure.md` map.
 - Review cycle applied in the initial-project-info phase: simplification plan (9 dedup steps) executed in commit `fd194ee`; adherence report `ADHERENT` (`.kilo/plans/20261001-initialize-project-info-adherence.md`).
 - Branch state: all phases are now merged to `main`. Phase 1A (`f3b9a77`), Phase 1B (`3d2d995`), and Phase 2 (`c2930d5`) sit on `main`, pushed to `origin`; the feature branches `feat/phase1a-core-game-model`, `feat/phase1b-terminal-game`, `feat/initialize-project-info`, and `feat/phase2-docker-windows-build` were all merged and deleted. `main` HEAD is `c2930d5`.
+- **Square board (TODO line 3, `feat/terminal-rendering-and-board`):** board constants doubled and squared in the single source of truth `src/game/state.rs` (`WIDTH: i32 = 40 → 80`, `HEIGHT: i32 = 25 → 80`); all consumers (bounds predicates, collision, food placement, renderer, all eight test files) adapt automatically because they derive from the named constants — zero test edits; docs dimension references updated to 80×80 (README, docs/terminal-ui.md, architecture.md); brief.md §5 intentionally untouched (recommendation only). Frame at 80×80 = 82 border columns × 82 board rows + score line; README carries the terminal-size note.
 
 ---
 
