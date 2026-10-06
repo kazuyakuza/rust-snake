@@ -27,7 +27,7 @@
 
 # Integration tests (tests/)
 
-Eight headless integration test files for the deterministic core logic and the terminal flow; run via `cargo test` (execution still requires the Cargo toolchain inside Docker; the documented build command performs the release build only — see the **Build & Run** section in [`README.md`](../README.md)). Each file imports the modules through the library crate (`snake::game::*`, `snake::terminal::*`).
+Nine headless integration test files for the deterministic core logic and the terminal flow; run via `cargo test` (execution still requires the Cargo toolchain inside Docker; the documented build command performs the release build only — see the **Build & Run** section in [`README.md`](../README.md)). Each file imports the modules through the library crate (`snake::game::*`, `snake::terminal::*`).
 
 - tests/initial_state.rs - initial snake (length/head/segments), score, direction, status, and in-bounds/valid-food guarantees
 - tests/direction.rs - accepted direction changes and rejection of immediate reversals
@@ -37,6 +37,7 @@ Eight headless integration test files for the deterministic core logic and the t
 - tests/food_placement.rs - food-placement guarantees: in-bounds, never on an occupied cell, last-free-cell `Some`, full-board `None`
 - tests/gameplay_flow.rs - complete flow through tick: start gate, eat/grow, boundary & self collisions
 - tests/terminal_modules.rs - arrow-key mapping, tick semantics, renderer snapshot via a Vec<u8> buffer
+- tests/direction_swap_reversal.rs - rapid direction-swap reversal regression: buffered-burst bug repros and legit-turn pins (10 tests)
 
 # Docker build infrastructure
 

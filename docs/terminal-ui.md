@@ -10,11 +10,13 @@ Implemented now (Phase 1B, Groups A, B, C and D): the renderer, arrow-key input
 mapping, lifecycle guard (incl. the `output()` accessor), and the game loop
 (`run_playing_loop`, `tick`) with its chronological arrow-directions drain, plus
 the start / game-over screens and their `src/main.rs` wiring that connects the
-whole flow end to end (start → play → game over → exit), and fifteen headless
-tests in two new files (`tests/gameplay_flow.rs`, `tests/terminal_modules.rs`).
-The tests are authored only — no local Rust toolchain is configured in this
-environment, so execution arrives with the Docker build phase (Phase 2), as
-does any interactive run of the binary — there is no restart flow.
+whole flow end to end (start → play → game over → exit), and the headless
+tests in two files (`tests/gameplay_flow.rs`, `tests/terminal_modules.rs`).
+The suite is executed in the Alpine VM Docker — as of 2026-10-06 all 71 test
+functions across nine integration files pass (0 failed) — while no local
+Rust toolchain is configured in this environment, so an interactive run of
+the binary still arrives with the Docker build phase (Phase 2) — there is no
+restart flow.
 `cargo build` and `cargo test` do not run here.
 
 ## File Map
@@ -40,9 +42,15 @@ binary and the integration tests reach the terminal API through `snake::terminal
   never scrolls.
 - **Input mapping is pure.** `map_key_event_to_direction` is a standalone
   function over a `crossterm` `KeyEvent`, with no terminal side effects.
-- **Reversal is a domain concern.** Rejecting an immediate reversal belongs to
+- **Reversal is a domain concern.** Reversal enforcement belongs to
   `src/game`, not the terminal layer — see the "no duplicated rules" constraint
   in the Phase 1B TODO. The input layer only reports the requested direction.
+  The domain enforces this in two places: `change_direction` rejects an
+  immediate reversal when a press is applied, and `advance_one_step` resolves
+  an impossible reversal before the move begins — several presses drained
+  within one tick were each legal against the intermediate direction, yet the
+  burst can end opposite the direction actually moved in the previous move
+  (`resolve_impossible_reversal`, anchored on the neck→head geometry).
 - **Cleanup is guaranteed.** `TerminalHandle` restores the terminal on both an
   explicit `disable()` and on `Drop`, including when setup partially fails.
 
@@ -119,7 +127,9 @@ primitives in the section above are.
    waiting.
 3. A `Renderer` shares the handle's stream via `output()`, then
    `run_playing_loop` runs each tick: `drain_arrow_directions()` →
-   `change_direction` (the domain rejects reversals) → `advance_one_step()` →
+   `change_direction` (the domain rejects apply-time reversals) →
+   `advance_one_step()` (which first resolves any impossible buffered
+   reversal against the last moved direction) →
    `Renderer::render(&state)` → sleep the remainder of the tick, returning once
    the status leaves `Playing`.
 4. `show_game_over_screen` clears the screen and writes `GAME OVER`, a blank
@@ -165,7 +175,10 @@ produces the binary, run `dist/snake.exe` in a real Windows terminal and check:
   until a key is pressed.
 - Board draws once per tick and does **not** scroll; head, body, and food are
   distinguishable by color (yellow / green / red).
-- Arrow keys steer the snake; a press that would reverse into itself is ignored.
+- Arrow keys steer the snake; a single press opposite the current direction is
+  ignored, and rapid multi-key swapping drained within one tick can never
+  reverse the snake onto its own body — quick `Up`/`Left` bursts and continuous
+  circling must not end the game, while plain 90-degree turns still steer.
 - On collision the game-over screen shows `GAME OVER`, `Score: <n>`, and
   `Press any key to exit`; the app exits after the next key press.
 - On exit (including after game over) the cursor is visible and the terminal is

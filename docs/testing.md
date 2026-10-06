@@ -27,17 +27,18 @@ suite drives the initial 3-segment snake (head `(10, 12)`, heading `Right`, scor
 with an in-memory `Vec<u8>` renderer (`HeadlessLoop`). Helpers:
 `playing_game`, `apply_and_step`, `assert_snake_survived`.
 
-The suite is currently split 5 / 5: five tests are bug repros that **fail** until
-the direction-handling fix lands, and five are regression pins that pass now and
-must stay green.
+The suite is split 5 / 5: five tests are bug repros that were authored to fail
+against the pre-fix domain and loop code, and five are regression pins. With the
+step-time impossible-reversal resolution in `advance_one_step` (version 0.3.3),
+all ten tests pass and must stay green.
 
 | Test | Layer | Status |
 | --- | --- | --- |
-| `two_key_burst_within_one_tick_must_not_step_onto_the_neck` | domain | Fails until fix |
-| `three_key_burst_ending_in_reversal_must_not_step_onto_the_neck` | domain | Fails until fix |
-| `two_tick_interleaved_burst_must_not_reenter_the_body` | domain | Fails until fix |
-| `loop_tick_survives_a_two_key_burst_in_one_tick` | loop | Fails until fix |
-| `loop_tick_survives_a_three_key_burst_ending_in_reversal` | loop | Fails until fix |
+| `two_key_burst_within_one_tick_must_not_step_onto_the_neck` | domain | Bug repro (green since 0.3.3) |
+| `three_key_burst_ending_in_reversal_must_not_step_onto_the_neck` | domain | Bug repro (green since 0.3.3) |
+| `two_tick_interleaved_burst_must_not_reenter_the_body` | domain | Bug repro (green since 0.3.3) |
+| `loop_tick_survives_a_two_key_burst_in_one_tick` | loop | Bug repro (green since 0.3.3) |
+| `loop_tick_survives_a_three_key_burst_ending_in_reversal` | loop | Bug repro (green since 0.3.3) |
 | `three_key_burst_not_ending_in_reversal_stays_alive` | domain | Passes (pin) |
 | `one_turn_per_tick_circles_back_to_the_start_cell` | domain | Passes (pin) |
 | `right_angle_turn_between_ticks_still_turns` | domain | Passes (pin) |
@@ -47,8 +48,9 @@ must stay green.
 Two pins define the boundary the fix must not cross:
 `double_key_turn_within_one_tick_toward_free_cells_still_turns` pins the
 `[Right, Down]` one-tick turn (a legitimate double-turn toward a free cell, so
-the final direction is `Down`), while the failing `..._three_key_burst_ending_in_reversal_...`
-tests pin that a burst ending opposite the last-moved direction must be rejected.
+the final direction is `Down`), while the bug-repro `..._three_key_burst_ending_in_reversal_...`
+tests pin that a burst ending opposite the last-moved direction must be resolved
+before the move begins.
 `one_turn_per_tick_circles_back_to_the_start_cell` and
 `loop_tick_survives_continuous_circling_for_two_revolutions` assert a one-turn-per-tick
 circle returns the head to `(10, 12)` without any self-overlap.
