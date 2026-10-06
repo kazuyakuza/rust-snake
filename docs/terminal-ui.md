@@ -58,9 +58,12 @@ Renderer (`src/terminal/renderer.rs`):
   - Reads `game::state::{GameState, WIDTH, HEIGHT}` (board is 80 x 80) and the
     domain accessors `state.snake().head()` / `.segments()`, `state.food()`,
     `state.score()`.
-  - Glyphs: each cell is a two-column span — head `●●`, body `██`, food `◆◆`,
-    empty `  `; borders stay single-character `+ - |` (border row is `-` × (2×WIDTH));
-    score line `Score: <n>`.
+  - Glyphs: each terminal row packs two logical rows via half-block glyphs —
+    upper half `▀` (U+2580), lower half `▄` (U+2584), full block `█` (U+2588)
+    when both halves are occupied, space when empty; colors via crossterm
+    `SetColors`: head yellow, body green, food red, empty default; borders stay
+    single-character `+ - |` (border row is `-` × WIDTH); score line `Score: <n>`;
+    frame is 82 columns × 43 rows.
 
 Input (`src/terminal/input.rs`):
 
@@ -142,7 +145,8 @@ their test files:
   `Direction` mapping, non-arrow press `None`, key release `None`:
   `tests/terminal_modules.rs`.
 - `Renderer` over a `&mut Vec<u8>` buffer (`src/terminal/renderer.rs`) — frame
-  snapshots via byte counting (border corners, glyph counts, score line):
+  snapshots via byte counting (border corners, glyph counts, color sequences,
+  score line):
   both test files.
 
 Explicit exclusions (not headless-testable; manual / Phase 2 validation only):
@@ -159,8 +163,8 @@ produces the binary, run `dist/snake.exe` in a real Windows terminal and check:
 
 - The start screen shows `Press any key to start` and the snake stays still
   until a key is pressed.
-- Board draws once per tick and does **not** scroll; head and body glyphs are
-  distinct.
+- Board draws once per tick and does **not** scroll; head, body, and food are
+  distinguishable by color (yellow / green / red).
 - Arrow keys steer the snake; a press that would reverse into itself is ignored.
 - On collision the game-over screen shows `GAME OVER`, `Score: <n>`, and
   `Press any key to exit`; the app exits after the next key press.

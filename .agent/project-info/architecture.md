@@ -72,7 +72,7 @@ Coded in `src/game/` (brief §14):
 
 Coded in `src/terminal/`; depends on `crossterm` for the platform handling and reads the domain as `snake::game::*`:
 
-- `Renderer<W: Write>` (`renderer.rs`) — stateless-per-call, full-frame writer: draws border rows (`+`/`-`/`|`), per-cell two-column glyph spans (head `●●` U+25CF×2, body `██` U+2588×2, food `◆◆` U+25C6×2, empty two spaces), and a `Score: N` line, queued at the home position and flushed. Generic over the output so tests can render into a `Vec<u8>` buffer.
+- `Renderer<W: Write>` (`renderer.rs`) — stateless-per-call, full-frame writer: draws border rows (`+`/`-`/`|`), packs two logical rows per terminal row via half-block glyphs (`▀` U+2580 upper half, `▄` U+2584 lower half, `█` U+2588 both halves; colors: head yellow, body green, food red, empty default), and a `Score: N` line, queued at the home position and flushed. Generic over the output so tests can render into a `Vec<u8>` buffer.
 - Input (`input.rs`) — pure `map_key_event_to_direction(&KeyEvent) -> Option<Direction>` plus non-blocking `drain_arrow_directions()` / `drain_arrow_event()` built on a zero-duration `crossterm` poll. Reversal rejection is *not* here; it stays in `GameState::change_direction`.
 - `TerminalHandle<W: Write>` (`lifecycle.rs`) — RAII guard: `enable()` turns on raw mode, enters the alternate screen, and hides the cursor; `disable()` and `Drop` restore them. Also owns/exposes the output via `output()`.
 - `game_loop` (`game_loop.rs`) — `run_playing_loop()` drives the fixed 120 ms loop while the status is `Playing`; a `tick()` helper executes one step headlessly (apply directions → `advance_one_step` → render) for tests.
@@ -98,8 +98,8 @@ Coded in `src/terminal/`; depends on `crossterm` for the platform handling and r
 
 ## Game Layout & Input Rules
 
-- Board: logical grid, `WIDTH = 80`, `HEIGHT = 80` cells (doubled + squared per TODO 2026-10-05); visible ASCII boundaries (`+` corners, `-` horizontal, `|` vertical); no screen wrap (brief §8).
-- Cell glyphs (double-width since 2026-10-05, Task 4): each logical cell renders as a two-column span — snake head `●●` (U+25CF ×2), snake body `██` (U+2588 ×2), food `◆◆` (U+25C6 ×2), empty space two spaces; borders stay single-character (`+` corners, `-` ×(2×WIDTH) horizontal rows, `|` verticals); score line rendered as `Score: N` (brief §5, §10, §13).
+- Board: logical grid, `WIDTH = 80`, `HEIGHT = 80` cells (doubled + squared per TODO 2026-10-05); visible ASCII boundaries (`+` corners, `-` horizontal, `|` vertical); the frame renders as 82 columns × 43 rows (two logical rows packed per terminal row); no screen wrap (brief §8).
+- Cell glyphs (half-block packed since 2026-10-05): each terminal row packs two logical rows — upper half `▀` (U+2580), lower half `▄` (U+2584), full block `█` (U+2588) when both halves are occupied, space when empty; colors via crossterm `SetColors`: head yellow, body green, food red, empty default; borders stay single-character (`+` corners, `-` × WIDTH horizontal rows, `|` verticals); score line rendered as `Score: N` (brief §5, §10, §13).
 - Snake starts with 1 head + 2 body segments = 3 blocks; initial direction `RIGHT` (brief §4, §13).
 - Controls: arrow keys only; movement is continuous; immediate reversal (e.g. `RIGHT` → `LEFT` in one move) is rejected by `GameState::change_direction` (brief §6).
 
