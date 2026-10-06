@@ -2,7 +2,9 @@ use crossterm::event::{KeyCode, KeyEvent, KeyEventKind, KeyModifiers, KeyEventSt
 
 use snake::game::direction::Direction;
 use snake::game::position::Position;
-use snake::game::setup::initial_setup;
+use snake::game::food::Food;
+use snake::game::setup::{GameStateSetup, initial_setup};
+use snake::game::snake::Snake;
 use snake::game::state::{GameStatus, GameState, HEIGHT};
 use snake::terminal::game_loop::tick;
 use snake::terminal::renderer::Renderer;
@@ -10,6 +12,17 @@ use snake::terminal::input::map_key_event_to_direction;
 
 fn fresh_game() -> GameState {
     GameState::new(initial_setup())
+}
+
+fn vertical_snake_game() -> GameState {
+    GameState::new(GameStateSetup {
+        snake: Snake::new(Vec::from([
+            Position { x: 10, y: 12 },
+            Position { x: 10, y: 13 },
+        ])),
+        food: Food::new(Position { x: 0, y: 0 }),
+        direction: Direction::Right,
+    })
 }
 
 fn arrow_press(key_code: KeyCode) -> KeyEvent {
@@ -149,15 +162,20 @@ fn render_writes_the_full_frame_into_the_buffer() {
     }
 
     assert_eq!(count_occurrences(&buffer, "+"), 4);      // 4 corners
-    assert_eq!(count_occurrences(&buffer, "-"), 320);    // 160 per border row * 2 borders
-    assert_eq!(count_occurrences(&buffer, "|"), 160);    // 2 per board row * 80 rows
+    assert_eq!(count_occurrences(&buffer, "-"), 160);    // 80 per border row * 2 borders
+    assert_eq!(count_occurrences(&buffer, "|"), 80);     // 2 per packed row * 40 packed rows
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 1);
-    assert_eq!(count_occurrences(&buffer, "\r\n"), 83);  // 80 board + 2 border + 1 score lines
+    assert_eq!(count_occurrences(&buffer, "\r\n"), 43);  // 1 top + 40 packed + 1 bottom + 1 score
 
-    // Each logical cell is now 2 terminal columns, so single-character counts double:
-    assert_eq!(count_occurrences(&buffer, "●"), 2);      // head span = 2 circles
-    assert_eq!(count_occurrences(&buffer, "█"), 4);      // 2 body cells * 2 full blocks each
-    assert_eq!(count_occurrences(&buffer, "◆"), 2);      // food span = 2 diamonds
+    // Initial state: head, 2 body segments, and food all sit in logical row 12,
+    // the top half of packed row 6; every bottom half is empty.
+    assert_eq!(count_occurrences(&buffer, "▀"), 4);
+    assert_eq!(count_occurrences(&buffer, "▄"), 0);
+    assert_eq!(count_occurrences(&buffer, "█"), 0);
+
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;11;49m▀"), 1); // yellow head
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;10;49m▀"), 2); // green body
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;9;49m▀"), 1);  // red food
 }
 
 #[test]
@@ -171,10 +189,11 @@ fn tick_renders_one_consistent_frame_of_glyphs() {
         tick(&mut state, &[], &mut renderer).expect("tick succeeds");
     }
 
-    assert_eq!(count_occurrences(&buffer, "●"), 2);
-    assert_eq!(count_occurrences(&buffer, "█"), 4);
-    assert_eq!(count_occurrences(&buffer, "◆"), 2);
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;11;49m▀"), 1);
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;10;49m▀"), 2);
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;9;49m▀"), 1);
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 1);
+    assert_eq!(count_occurrences(&buffer, "\r\n"), 43);
 }
 
 #[test]
@@ -190,6 +209,36 @@ fn two_renders_reuse_the_frame_without_scrolling() {
 
     assert_eq!(count_occurrences(&buffer, "+"), 8);
     assert_eq!(count_occurrences(&buffer, "Score: 0"), 2);
-    assert_eq!(count_occurrences(&buffer, "●"), 4);     // 2 frames * 2 head chars
-    assert_eq!(count_occurrences(&buffer, "\r\n"), 166); // 83 lines * 2 frames
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;11;49m▀"), 2);
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;10;49m▀"), 4);
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;9;49m▀"), 2);
+    assert_eq!(count_occurrences(&buffer, "\r\n"), 86);  // 43 * 2 frames
+}
+
+#[test]
+fn vertical_neighbors_render_as_a_full_block() {
+    let state = vertical_snake_game();
+
+    let mut buffer = Vec::new();
+    {
+        let mut renderer = Renderer::new(&mut buffer);
+        renderer.render(&state).expect("render succeeds");
+    }
+
+    assert_eq!(count_occurrences(&buffer, "\x1B[38;5;11;48;5;10m█"), 1);
+}
+
+#[test]
+fn empty_cells_render_with_default_colors() {
+    let state = fresh_game();
+
+    let mut buffer = Vec::new();
+    {
+        let mut renderer = Renderer::new(&mut buffer);
+        renderer.render(&state).expect("render succeeds");
+    }
+
+    // 80 columns * 40 packed rows = 3200 board cells; 4 are occupied in the
+    // initial state, and each empty cell emits the default-color SGR + a space.
+    assert_eq!(count_occurrences(&buffer, "\x1B[39;49m "), 3196);
 }
