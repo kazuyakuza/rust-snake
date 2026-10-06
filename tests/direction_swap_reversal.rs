@@ -119,7 +119,7 @@ struct HeadlessLoop {
 
 impl HeadlessLoop {
     fn new() -> HeadlessLoop {
-        let mut state = playing_game();
+        let state = playing_game();
         HeadlessLoop { state, buffer: Vec::new() }
     }
 
