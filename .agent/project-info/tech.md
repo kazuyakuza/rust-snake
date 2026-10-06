@@ -15,7 +15,7 @@
 
 - Docker is used only as the compilation environment; the resulting executable must run directly on Windows outside the container (brief §3).
 - The Docker image is implemented and pinned via `Dockerfile`: `rust:1.98.1-slim-bookworm` with mingw-w64, the `x86_64-pc-windows-gnu` target added through `rustup target add`, and the linker configured in `.cargo/config.toml` — no local Rust toolchain on the host (brief §3).
-- All Rust code (domain, terminal layer, tests) is hand-written and manually reviewed; compilation happens in Docker. The build command compiles the release binary only — the test suite remains authored-only until a cargo test run is executed in a future step.
+- All Rust code (domain, terminal layer, tests) is hand-written and manually reviewed; compilation happens in Docker. The build command compiles the release binary only — the test suite is executed separately with `cargo test`: 71 `#[test]` functions across 9 files ran green (0 failed) in the Alpine VM Docker as of 2026-10-06 (see [`docs/testing.md`](../../docs/testing.md)).
 - AI-agent tooling: Kilo Code and/or opencode, per [AGENTS.md](../../AGENTS.md) (both already configured in this repo).
 
 ---
