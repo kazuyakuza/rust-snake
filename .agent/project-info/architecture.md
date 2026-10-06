@@ -138,7 +138,7 @@ The `GameStatus` enum (`WaitingToStart | Playing | GameOver`) and its transition
 
 - Build (implemented): `docker compose run --rm build` → host-mounted output `dist/snake.exe`; single command defined in `compose.yaml` (brief §3). Workflow documented in [`docs/BUILD.md`](../../docs/BUILD.md).
 - Run (manual): execute `dist/snake.exe` directly on a Windows terminal, outside the container — separate manual validation step (brief §3, §18).
-- Tests: eight authored integration files under `tests/` (six Phase 1A + two Phase 1B), 59 `#[test]` functions total; **authored only, not yet executed** — the build command performs the release build only; execution via `cargo test` awaits a future step (no local Rust toolchain).
+- Tests: nine integration test files under `tests/` (six Phase 1A + two Phase 1B + the 2026-10-06 direction-swap regression file `tests/direction_swap_reversal.rs`), 71 `#[test]` functions total; executed GREEN in the Alpine VM Docker as of 2026-10-06 (full suite, 0 failed).
 - Develop: read `AGENTS.md` → `.agent/WORKFLOWS.md` → Critical Workflow (`.kilo/commands/critical-workflow.md`); project context lives in `.agent/project-info/*`.
 
 ---

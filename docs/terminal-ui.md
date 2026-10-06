@@ -164,7 +164,8 @@ Explicit exclusions (not headless-testable; manual / Phase 2 validation only):
 (`drain_arrow_directions`, `drain_arrow_event`), the lifecycle guard
 (`TerminalHandle::enable`/`disable`/`Drop`), and the start / game-over screens
 with `wait_for_any_key_press` — see "How to Validate Manually" below. Test
-execution itself arrives with the Docker build phase (Phase 2).
+execution arrived with the 2026-10-06 fix workflow (Alpine VM Docker, full
+suite green — see docs/testing.md).
 
 ## How to Validate Manually
 
