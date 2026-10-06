@@ -1,6 +1,6 @@
 # Architecture — Rust Snake
 
-**Status:** Phase 2 build infrastructure implemented: `Dockerfile` (pinned `rust:1.98.1-slim-bookworm` + mingw-w64), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`). The first actual compilation and test execution still await the user's Docker run.
+**Status:** Phase 2 build infrastructure implemented: `Dockerfile` (pinned `rust:1.98.1-slim-bookworm` + mingw-w64), `compose.yaml` (`build` service → `dist/snake.exe`), `.cargo/config.toml`, and the documentation (`docs/BUILD.md`). The first compilation and test execution happened in the Alpine VM Docker; the full suite runs green (71 test functions across 9 files, 0 failed, as of 2026-10-06); manual Windows validation of the built dist/snake.exe remains pending.
 
 ## System Architecture
 
