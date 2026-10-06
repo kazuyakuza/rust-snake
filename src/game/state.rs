@@ -5,7 +5,8 @@
 //! the board when it lies in the inclusive range `MIN_AVAILABLE_COORDINATE..=WIDTH - 1`
 //! (`x`) or `..=HEIGHT - 1` (`y`), with no wrap-around. `GameState` owns the snake,
 //! food, direction, score, and `GameStatus`; `advance_one_step` resolves a single
-//! move: boundary and self collisions, food consumption, and status transitions.
+//! move: the impossible-reversal pending-direction guard, boundary and self
+//! collisions, food consumption, and status transitions.
 
 use crate::game::collision;
 use crate::game::direction::Direction;
@@ -21,6 +22,7 @@ pub const HEIGHT: i32 = 80;
 const INITIAL_SCORE: i32 = 0;
 pub const MIN_AVAILABLE_COORDINATE: i32 = 0;
 const SCORE_INCREMENT: i32 = 1;
+const NECK_SEGMENT_INDEX: usize = 1;
 
 fn is_within_bounds(value: i32, max_inclusive: i32) -> bool {
     value >= MIN_AVAILABLE_COORDINATE && value <= max_inclusive
@@ -32,6 +34,17 @@ pub fn is_inside_board(position: Position) -> bool {
 
 fn is_immediate_reversal(current: Direction, candidate: Direction) -> bool {
     candidate == current.opposite()
+}
+
+fn direction_from_neck_to_head(neck: Position, head: Position) -> Option<Direction> {
+    let (step_x, step_y) = (head.x - neck.x, head.y - neck.y);
+    match (step_x, step_y) {
+        (1, 0) => Some(Direction::Right),
+        (-1, 0) => Some(Direction::Left),
+        (0, 1) => Some(Direction::Down),
+        (0, -1) => Some(Direction::Up),
+        _ => None,
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -84,6 +97,10 @@ impl GameState {
     /// Steer the snake, rejecting an immediate reversal into itself. Returns
     /// `true` when the direction changed, or `false` when `new_direction` is
     /// directly opposite the current one (the direction is then left unchanged).
+    ///
+    /// Presses drained between two steps can still leave the pending direction
+    /// opposite the last actually-moved direction; `advance_one_step` resolves
+    /// such an impossible reversal before stepping.
     pub fn change_direction(&mut self, new_direction: Direction) -> bool {
         if is_immediate_reversal(self.current_direction, new_direction) {
             return false;
@@ -92,12 +109,32 @@ impl GameState {
         true
     }
 
+    fn direction_of_last_move(&self) -> Option<Direction> {
+        let neck = self.snake.segments().get(NECK_SEGMENT_INDEX).copied()?;
+        direction_from_neck_to_head(neck, self.snake.head())
+    }
+
+    /// A buffered burst may leave the pending direction opposite the direction of
+    /// the previous actual move: no single press was rejected (each was compared
+    /// against the intermediate pending direction), yet the combined outcome steps
+    /// straight back onto the body. The pending direction is re-resolved to the
+    /// last moved direction so that move never begins.
+    fn resolve_impossible_reversal(&mut self) {
+        let Some(last_moved_direction) = self.direction_of_last_move() else {
+            return;
+        };
+        if self.current_direction == last_moved_direction.opposite() {
+            self.current_direction = last_moved_direction;
+        }
+    }
+
     /// Advance one playing tick: move onto the next cell, or end the game on a
     /// boundary or self collision. Does nothing unless the game is playing.
     pub fn advance_one_step(&mut self) {
         if !self.is_playing() {
             return;
         }
+        self.resolve_impossible_reversal();
         let next_head = self.snake.head() + self.current_direction.offset();
         if collision::is_outside_board(next_head) {
             self.enter_game_over();
