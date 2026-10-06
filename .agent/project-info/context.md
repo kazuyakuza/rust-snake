@@ -4,7 +4,7 @@
 
 - **VM SSH MCP Server workflow (TODO `.agent/todos/20261004/20261004-todo-1-DONE.md`) is complete.** A standalone MCP server (`C:\repo\vm-ssh-mcp`, separate repo, Node.js ESM + `@modelcontextprotocol/sdk` + `ssh2`) now exposes two tools — `vm_status` (2-layer check: `VBoxManage showvminfo` VMState + SSH probe) and `vm_run_command` (status gate → prefix-allowlist gate → SSH exec) — for running allowlisted commands on the Alpine VirtualBox VM (`alpine@127.0.0.1:3022`). It is registered in the global opencode config (`C:\Users\ibej_\.config\opencode\opencode.jsonc`) as `alpine-vm` with `enabled: false` — the user flips it to `true` to activate. Live verification passed with the VM running (`uname -a` → Alpine 6.12.8-0-virt, `docker ps` → container table, `reboot` → byte-exact policy rejection, no password leaks). All tasks `[DONE]`, all adherence reports `ADHERENT`. This work is agent tooling in a separate repo — the Snake game code in `src/` is untouched.
 - Side effect for the Snake project: the user's first Docker build had produced `Cargo.lock`; it was committed during this workflow's git setup (`f1e951a` on `main`), closing the previous "commit Cargo.lock" next step.
-- Next up: see **Immediate Next Steps** below — manual Windows validation of the rebuilt `dist/snake.exe` (80×80 board, double-width cells, ~164×84 terminal window) and optional full `cargo test` execution.
+- Next up: see **Immediate Next Steps** below — manual Windows validation of the rebuilt `dist/snake.exe` (half-block packed 82×43 frame, fits standard consoles) and optional full `cargo test` execution.
 - **Alpine VM MCP (`alpine-vm`) availability verified 2026-10-05:** `vm_status` → running with SSH reachable on `127.0.0.1:3022`; `ls /rust-snake` in the VM lists the same files as the host repo, so `/rust-snake` is the project folder shared host→VM; Docker commands run through the MCP's `vm_run_command` allowlist (documented under Recent Changes). Full verification transcript: `.kilo/plans/20261005-vm-context-and-crossterm-research.md`.
 
 ---
@@ -55,17 +55,18 @@
 - **Implemented (Phase 1B Group D — tests):** 15 new headless test functions — `tests/gameplay_flow.rs` (4 — the complete start → play → game-over → exit flow driven over an in-memory buffer) and `tests/terminal_modules.rs` (11 — input mapping, drain semantics, `tick` semantics, and renderer output). Like all Phase 1A/1B tests they are **authored only, never executed** — no compilation has run in this workflow.
 - **Implemented (Phase 2):** the Docker-based Windows build workflow — pinned image, compose build service, artifact convention, documented command and docs — is complete as authored work.
 - **Implemented (side effect, 2026-10-04):** `Cargo.lock` exists (user's first Docker build ran) and is committed to `main` (`f1e951a`); `dist/` output exists locally but stays git-ignored. The 59 authored test functions remain **never executed** — the build command performs the release build only.
-- **Implemented (2026-10-05 workflow):** board `WIDTH = 80`, `HEIGHT = 80` in `src/game/state.rs` (single source of truth; all consumers and all eight test files adapt via the constants — zero test edits) and the double-width renderer (`src/terminal/renderer.rs` spans `EMPTY "  "`, `BODY "██"`, `HEAD "●●"`, `FOOD "◆◆"`, border `-` × 2×WIDTH). Package version `0.3.1`. The 59 authored tests remain never *executed* — the VM ran the release build (exit 0) and a compile-only `cargo test --no-run` (exit 0).
+- **Implemented (2026-10-05 workflow):** board `WIDTH = 80`, `HEIGHT = 80` in `src/game/state.rs` (single source of truth; all consumers and all eight test files adapt via the constants — zero test edits) and the double-width renderer (`src/terminal/renderer.rs` spans `EMPTY "  "`, `BODY "██"`, `HEAD "●●"`, `FOOD "◆◆"`, border `-` × 2×WIDTH). Package version `0.3.1`.
+- **Implemented (2026-10-05 fix workflow, TODO `.agent/todos/20261005/20261005-todo-2-DONE.md`):** half-block packed rendering (`src/terminal/renderer.rs`) — two logical rows per terminal row via `▀`/`▄`/`█` + colors (head Yellow, body Green, food Red), border `+` + `-`×80 + `+`, frame 82 cols × 43 rows; fixes the 83-row frame overflowing short consoles (snake/food/top-border scrolled out of view). Version `0.3.2`. **The authored test suite was executed for the first time in project history**: 17 tests passed in the VM (13 `terminal_modules` + 4 `gameplay_flow`, Linux host target); release build + compile-only `cargo test --no-run` exit 0; `dist/snake.exe` rebuilt with the packed renderer.
 - The domain logic in `src/game/` remains the **untouched source of truth** for game rules; the Phase 1B terminal layer only reads `GameState`, drives it through the existing `advance_one_step`/`change_direction`/`start_playing` API, and renders it — it adds no game rules.
 
 ---
 
 ## Immediate Next Steps
 
-Order matters — this is the project's live roadmap (post board+rendering workflow):
+Order matters — this is the project's live roadmap (post half-block fix workflow):
 
-1. Manually validate gameplay on Windows by running the rebuilt `dist/snake.exe` in a terminal window of at least ~164×84 cells (README carries the size note) against the Definition of Done checklist in `brief.md` §18 plus the two 2026-10-05 fixes (contiguous snake body; visually equal vertical/horizontal speed); report any runtime or visual issues back into a fix TODO.
-2. Optionally execute the authored test suite (`cargo test`, full run) in the VM's Docker in a later phase — release build and compile-only test check both passed; full execution remains pending.
+1. Manually validate gameplay on Windows by running the rebuilt `dist/snake.exe` (82×43 frame — fits standard consoles, no window resizing needed) against the Definition of Done checklist in `brief.md` §18 plus the 2026-10-05 fixes (whole frame visible without scrolling; contiguous colored snake; visually equal vertical/horizontal speed); report any runtime or visual issues back into a fix TODO.
+2. Optionally execute the remaining authored tests (`cargo test` full run — 17 of 59 executed green so far; the Phase 1A suite is still run-only-pending) in the VM's Docker in a later phase.
 3. User-side (outside this repo): optionally give `C:\repo\vm-ssh-mcp` a remote (`git remote add origin ...`) if it should be backed up.
 
 ---
